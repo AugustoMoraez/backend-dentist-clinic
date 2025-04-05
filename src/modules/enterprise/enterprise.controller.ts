@@ -7,7 +7,7 @@ import { UpdateEnterpriseDto } from './dto/update-enterprise.dto';
 export class EnterpriseController {
   constructor(private readonly EnterpriseService: EnterpriseService) {}
 
-  @Post("/register")
+  @Post("register")
   create(@Body() createEnterpriseDto: CreateEnterpriseDto) {
     return this.EnterpriseService.create(createEnterpriseDto);
   }
