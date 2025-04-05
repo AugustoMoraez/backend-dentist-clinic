@@ -9,6 +9,13 @@ export const ORM_MODULE = SequelizeModule.forRoot({
     port:26257,
     database:"postgres",
     synchronize: true,
+    ssl: true,  
+  dialectOptions: {
+    ssl: {
+      require: true,  
+      rejectUnauthorized: false, 
+    },
+  },
     models: [Enterprise,Address,Employee,Patient]
   })
 
