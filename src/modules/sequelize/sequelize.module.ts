@@ -1,4 +1,5 @@
 import { SequelizeModule } from "@nestjs/sequelize";
+import { Enterprise } from "../enterprise/entities/enterprise.entity";
 
 export const ORM_MODULE = SequelizeModule.forRoot({
     dialect:"postgres",
@@ -9,3 +10,5 @@ export const ORM_MODULE = SequelizeModule.forRoot({
     database:"postgres",
     synchronize: true
   })
+
+  export const ENTITIES = SequelizeModule.forFeature([Enterprise])
