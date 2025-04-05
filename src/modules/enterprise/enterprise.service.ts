@@ -1,11 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { CreateEmpresaDto } from './dto/create-empresa.dto';
-import { UpdateEmpresaDto } from './dto/update-empresa.dto';
+import { CreateEnterpriseDto } from './dto/create-enterprise.dto';
+import { UpdateEnterpriseDto } from './dto/update-enterprise.dto';
+import { InjectModel } from '@nestjs/sequelize';
+import { Enterprise } from './entities/enterprise.entity';
 
 @Injectable()
-export class EmpresaService {
-  create(createEmpresaDto: CreateEmpresaDto) {
-    return 'This action adds a new empresa';
+export class EnterpriseService {
+  constructor(@InjectModel(Enterprise) private EnterpriseModel ){}
+  create(createEnterpriseDto: CreateEnterpriseDto) {
+    return this.EnterpriseModel.create(createEnterpriseDto);
   }
 
   findAll() {
@@ -16,7 +19,7 @@ export class EmpresaService {
     return `This action returns a #${id} empresa`;
   }
 
-  update(id: number, updateEmpresaDto: UpdateEmpresaDto) {
+  update(id: number, updateEmpresaDto: UpdateEnterpriseDto) {
     return `This action updates a #${id} empresa`;
   }
 

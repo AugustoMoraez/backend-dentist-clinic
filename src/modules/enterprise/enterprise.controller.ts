@@ -1,34 +1,34 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { EmpresaService } from './enterprise.service';
-import { CreateEmpresaDto } from './dto/create-empresa.dto';
-import { UpdateEmpresaDto } from './dto/update-empresa.dto';
+import { EnterpriseService } from './enterprise.service';
+import { CreateEnterpriseDto } from './dto/create-enterprise.dto';
+import { UpdateEnterpriseDto } from './dto/update-enterprise.dto';
 
-@Controller('empresa')
-export class EmpresaController {
-  constructor(private readonly empresaService: EmpresaService) {}
+@Controller('enterprise')
+export class EnterpriseController {
+  constructor(private readonly EnterpriseService: EnterpriseService) {}
 
-  @Post()
-  create(@Body() createEmpresaDto: CreateEmpresaDto) {
-    return this.empresaService.create(createEmpresaDto);
+  @Post("/register")
+  create(@Body() createEnterpriseDto: CreateEnterpriseDto) {
+    return this.EnterpriseService.create(createEnterpriseDto);
   }
 
   @Get()
   findAll() {
-    return this.empresaService.findAll();
+    return this.EnterpriseService.findAll();
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.empresaService.findOne(+id);
+    return this.EnterpriseService.findOne(+id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateEmpresaDto: UpdateEmpresaDto) {
-    return this.empresaService.update(+id, updateEmpresaDto);
+  update(@Param('id') id: string, @Body() updateEnterpriseDto: UpdateEnterpriseDto) {
+    return this.EnterpriseService.update(+id, updateEnterpriseDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.empresaService.remove(+id);
+    return this.EnterpriseService.remove(+id);
   }
 }
