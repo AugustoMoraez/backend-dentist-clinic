@@ -77,39 +77,42 @@ export class Address extends Model<Address> {
     @Column(DataType.STRING)
     complement:string;
 }
+ 
 
 @Table
 export class Enterprise extends Model<Enterprise> {
-    @PrimaryKey
-    @IsUUID(4)
-    @Default(()=>v4())
-    @Column(DataType.UUIDV4 )
-    enterprise_id:string;
-    @Column(DataType.STRING )
-    email:string;
-    @Column(DataType.STRING )
-    password:string
-    @Column(DataType.STRING )
-    razao:string;
-    @Column(DataType.STRING )
-    fantasy_name:string;
-    @Column(DataType.STRING )
-    cnpj:string;
-    @Column(DataType.STRING )
-    cpf:string;
-    @Column(DataType.STRING )
-    contact_1:string;
-    @Column(DataType.STRING )
-    contact_2:string;
-    
-    @ForeignKey(()=>Address)
-    @Column(DataType.UUIDV4)
-    address_id:string;
+  @PrimaryKey
+  @Column(DataType.UUID)
+  enterprise_id: string;
 
-    @BelongsTo(()=>Address)
-    address:Address;
+  @Column(DataType.STRING)
+  email: string;
 
-    patient:Patient[];
-    employee:Employee[]
+  @Column(DataType.STRING)
+  password: string;
 
+  @Column(DataType.STRING)
+  razao: string;
+
+  @Column(DataType.STRING)
+  fantasy_name: string;
+
+  @Column(DataType.STRING)
+  cnpj: string;
+
+  @Column(DataType.STRING)
+  cpf: string;
+
+  @Column(DataType.STRING)
+  contact_1: string;
+
+  @Column(DataType.STRING)
+  contact_2: string;
+
+  @ForeignKey(() => Address)
+  @Column(DataType.UUID)
+  address_id: string;
+
+  @BelongsTo(() => Address)
+  address: Address;
 }
