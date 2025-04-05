@@ -13,12 +13,12 @@ export class Employee{
 
 }
 //Patient = paciente
-export class Patient {
+export class Patient {paciente
 
 }
 
 
-export class Empresa {
+export class Enterprise {
     id:string;
     email:string;
     password:string
