@@ -3,50 +3,7 @@ import { BelongsTo, Column, DataType, Default, ForeignKey, IsUUID, Model, Primar
 import { v4 } from "uuid";
 
 
-//Employee = Funcionario
-@Table
-export class Employee extends Model<Employee> {
-  @PrimaryKey
-  @IsUUID(4)
-  @Default(() => v4())
-  @Column(DataType.STRING)
-  employee_id: string; // ID do empregado
 
-  @ForeignKey(() => Enterprise)
-  @Column(DataType.UUID)
-  enterprise_id: string; // Chave estrangeira para Enterprise
-
-  @Column(DataType.STRING)
-  name: string;
-
-  @Column(DataType.STRING)
-  role: string;
-
-  @Column(DataType.STRING)
-  contact: string;
-}
-//Patient = paciente
-@Table
-export class Patient extends Model<Patient> {
-  @PrimaryKey
-  @IsUUID(4)
-  @Default(() => v4())
-  @Column(DataType.STRING)
-  patient_id: string; // ID do paciente
-
-  @ForeignKey(() => Enterprise)
-  @Column(DataType.UUID)
-  enterprise_id: string; // Chave estrangeira para Enterprise
-
-  @Column(DataType.STRING)
-  name: string;
-
-  @Column(DataType.STRING)
-  birth_date: string;
-
-  @Column(DataType.STRING)
-  contact: string;
-}
 
 @Table
 export class Address extends Model<Address> {
@@ -83,36 +40,31 @@ export class Address extends Model<Address> {
 export class Enterprise extends Model<Enterprise> {
   @PrimaryKey
   @Column(DataType.UUID)
-  enterprise_id: string;
+  enterprise_id;
 
   @Column(DataType.STRING)
-  email: string;
+  email;
 
   @Column(DataType.STRING)
-  password: string;
+  password;
 
   @Column(DataType.STRING)
-  razao: string;
+  razao;
 
   @Column(DataType.STRING)
-  fantasy_name: string;
+  fantasy_name;
 
   @Column(DataType.STRING)
-  cnpj: string;
+  cnpj;
 
   @Column(DataType.STRING)
-  cpf: string;
+  cpf;
 
   @Column(DataType.STRING)
-  contact_1: string;
+  contact_1;
 
   @Column(DataType.STRING)
-  contact_2: string;
+  contact_2;
 
-  @ForeignKey(() => Address)
-  @Column(DataType.UUID)
-  address_id: string;
-
-  @BelongsTo(() => Address)
-  address: Address;
+ 
 }
