@@ -1,5 +1,5 @@
 import { IsOptional, IsString } from "class-validator";
-import { BelongsTo, Column, DataType, Default, ForeignKey, IsUUID, Model, PrimaryKey, Table } from "sequelize-typescript";
+import {  Column, DataType, Default,  IsUUID, Model, PrimaryKey, Table } from "sequelize-typescript";
 import { v4 } from "uuid";
 
 

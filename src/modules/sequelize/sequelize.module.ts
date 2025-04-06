@@ -1,5 +1,5 @@
 import { SequelizeModule } from "@nestjs/sequelize";
-import { Address, Employee, Enterprise, Patient } from "../enterprise/entities/enterprise.entity";
+import { Address,  Enterprise } from "../enterprise/entities/enterprise.entity";
 
 export const ORM_MODULE = SequelizeModule.forRoot({
     dialect:"postgres",
@@ -16,9 +16,9 @@ export const ORM_MODULE = SequelizeModule.forRoot({
       rejectUnauthorized: false, 
     },
   },
-    models: [Enterprise,Address,Employee,Patient]
+    models: [Enterprise,Address]
   })
 
   export const ENTITIES = SequelizeModule.forFeature(
-    [Enterprise,Address,Employee,Patient]
+    [Enterprise,Address]
 )
