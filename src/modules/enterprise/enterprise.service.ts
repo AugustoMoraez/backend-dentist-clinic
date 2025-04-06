@@ -1,13 +1,28 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CreateEnterpriseDto } from './dto/create-enterprise.dto';
 import { UpdateEnterpriseDto } from './dto/update-enterprise.dto';
+import { DatabaseService } from '../database/database.service';
+import { Prisma } from '@prisma/client';
 
 
 @Injectable()
 export class EnterpriseService {
   
-  create(createEnterpriseDto: CreateEnterpriseDto) {
-    return "criado"
+  constructor(@Inject() private  prisma: DatabaseService){}
+  
+  create(createEnterpriseDto:Prisma.EnterpriseCreateInput) {
+    return this.prisma.enterprise.create({
+      data: {
+        email: createEnterpriseDto.email,
+        password: createEnterpriseDto.password,
+        company_name: createEnterpriseDto.company_name,
+        fantasy_name: createEnterpriseDto.fantasy_name,
+        cnpj: createEnterpriseDto.cnpj,
+        cpf: createEnterpriseDto.cpf,
+        contact_1: createEnterpriseDto.contact_1,
+        contact_2: createEnterpriseDto.contact_2
+      },
+    })
   }
 
   findAll() {
@@ -18,7 +33,7 @@ export class EnterpriseService {
     return `This action returns a #${id} empresa`;
   }
 
-  update(id: number, updateEmpresaDto: UpdateEnterpriseDto) {
+  update(id: number, UpdateEnterpriseDto: UpdateEnterpriseDto) {
     return `This action updates a #${id} empresa`;
   }
 

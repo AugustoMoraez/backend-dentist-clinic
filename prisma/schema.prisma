@@ -10,3 +10,25 @@ datasource db {
 enum crdb_internal_region {
   gcp_southamerica_east1 @map("gcp-southamerica-east1")
 }
+
+model Enterprise {
+
+  id String @id @default(uuid())
+
+  email String
+
+  password String
+
+  company_name String
+
+  fantasy_name String
+
+  cnpj String
+
+  cpf String
+
+  contact_1 String
+
+  contact_2 String
+
+}
