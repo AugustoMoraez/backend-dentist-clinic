@@ -1,14 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { CreateEnterpriseDto } from './dto/create-enterprise.dto';
 import { UpdateEnterpriseDto } from './dto/update-enterprise.dto';
-import { InjectModel } from '@nestjs/sequelize';
-import { Enterprise } from './entities/enterprise.entity';
+
 
 @Injectable()
 export class EnterpriseService {
-  constructor(@InjectModel(Enterprise) private EnterpriseModel ){}
+  
   create(createEnterpriseDto: CreateEnterpriseDto) {
-    return this.EnterpriseModel.create(createEnterpriseDto);
+    return "criado"
   }
 
   findAll() {
