@@ -1,7 +1,6 @@
 import { IsOptional, IsString } from "class-validator";
-import {  Column, DataType, Default,  IsUUID, Model, PrimaryKey, Table } from "sequelize-typescript";
+import {  Column, DataType, Default, IsEmail, IsUUID, Model, PrimaryKey, Table } from "sequelize-typescript";
 import { v4 } from "uuid";
-
 
 
 
@@ -39,32 +38,37 @@ export class Address extends Model<Address> {
 @Table
 export class Enterprise extends Model<Enterprise> {
   @PrimaryKey
-  @Column(DataType.UUID)
-  enterprise_id;
+  @Default(()=>v4())
+  @Column(DataType.UUIDV4)
+  enterprise_id: string;
+
+  @IsEmail
+  @Column(DataType.STRING)
+  email: string;
 
   @Column(DataType.STRING)
-  email;
+  password: string;
 
   @Column(DataType.STRING)
-  password;
+  razao: string;
 
   @Column(DataType.STRING)
-  razao;
+  fantasy_name: string;
+
+  @IsOptional()
+  @Column(DataType.STRING)
+  cnpj: string;
+
+  @IsOptional()
+  @Column(DataType.STRING)
+  cpf: string;
 
   @Column(DataType.STRING)
-  fantasy_name;
+  contact_1: string;
 
+  @IsOptional()
   @Column(DataType.STRING)
-  cnpj;
-
-  @Column(DataType.STRING)
-  cpf;
-
-  @Column(DataType.STRING)
-  contact_1;
-
-  @Column(DataType.STRING)
-  contact_2;
+  contact_2: string;
 
  
 }
