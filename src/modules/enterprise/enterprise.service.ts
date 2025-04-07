@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { CreateEnterpriseDto } from './dto/create-enterprise.dto';
 import { UpdateEnterpriseDto } from './dto/update-enterprise.dto';
 import { DatabaseService } from '../database/database.service';
+import { Prisma } from '@prisma/client';
  
 
 
@@ -10,7 +11,7 @@ export class EnterpriseService {
   
   constructor(@Inject() private  prisma: DatabaseService){}
   
-  create(createEnterpriseDto:CreateEnterpriseDto) {
+  create(createEnterpriseDto:Prisma.EnterpriseCreateInput) {
     return this.prisma.enterprise.create({
       data: {
         email: createEnterpriseDto.email,
@@ -22,6 +23,7 @@ export class EnterpriseService {
         contact_1: createEnterpriseDto.contact_1,
         contact_2: createEnterpriseDto.contact_2
       },
+    
     })
   }
 

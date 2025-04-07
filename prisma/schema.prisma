@@ -7,28 +7,18 @@ datasource db {
   url      = "postgresql://dev:pq-0pEr7q2rLCKl90d6qIg@battle-howler-5642.jxf.gcp-southamerica-east1.cockroachlabs.cloud:26257/nest?sslmode=verify-full"
 }
 
-enum crdb_internal_region {
-  gcp_southamerica_east1 @map("gcp-southamerica-east1")
+model Enterprise {
+  id           String @id @default(uuid())
+  email        String @unique
+  password     String
+  company_name String @unique
+  fantasy_name String
+  cnpj         String @unique
+  cpf          String @unique
+  contact_1    String
+  contact_2    String
 }
 
-model Enterprise {
-
-  id String @id @default(uuid())
-
-  email String
-
-  password String
-
-  company_name String
-
-  fantasy_name String
-
-  cnpj String
-
-  cpf String
-
-  contact_1 String
-
-  contact_2 String
-
+enum crdb_internal_region {
+  gcp_southamerica_east1 @map("gcp-southamerica-east1")
 }
