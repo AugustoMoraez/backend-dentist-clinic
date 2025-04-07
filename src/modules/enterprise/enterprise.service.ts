@@ -11,8 +11,8 @@ export class EnterpriseService {
   
   constructor(@Inject() private  prisma: DatabaseService){}
   
-  create(createEnterpriseDto:Prisma.EnterpriseCreateInput) {
-    return this.prisma.enterprise.create({
+  async create(createEnterpriseDto:Prisma.EnterpriseCreateInput) {
+    return await this.prisma.enterprise.create({
       data: {
         email: createEnterpriseDto.email,
         password: createEnterpriseDto.password,
