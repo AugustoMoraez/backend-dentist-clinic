@@ -19,12 +19,11 @@ export class Enterprise {
 
   enterprise_id: string;
 
-
   email: string;
 
   password: string;
 
-  razao: string;
+  company_name: string;
 
   fantasy_name: string;
 
