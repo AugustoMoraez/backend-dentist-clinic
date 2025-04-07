@@ -12,6 +12,7 @@ export class EnterpriseService {
   constructor(@Inject() private  prisma: DatabaseService){}
   
   async create(createEnterpriseDto:Prisma.EnterpriseCreateInput) {
+    console.log("CONSOLE.LOG ------->"+createEnterpriseDto)
     return await this.prisma.enterprise.create({
       data: {
         email: createEnterpriseDto.email,
