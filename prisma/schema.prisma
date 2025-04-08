@@ -24,8 +24,8 @@ model Enterprise {
   id           String  @id @unique @default(uuid())
   email        String  @unique
   password     String
-  company_name String  @unique
-  fantasy_name String
+  company_name String?  @unique
+  fantasy_name String?
   cnpj         String? @unique
   cpf          String? @unique
   contact_1    String
