@@ -9,11 +9,11 @@ datasource db {
 
 model Address {
   id           String  @id @default(uuid())
-  house_number String
-  street       String
-  district     String
-  city         String
-  state        String
+  house_number String?
+  street       String?
+  district     String?
+  city         String?
+  state        String?
   complement   String?
 
   enterprise_id String     @unique

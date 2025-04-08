@@ -54,7 +54,6 @@ export const AddressSchema = z.object({
   city: z.string().min(1, 'A cidade é obrigatória'),
   state: z.string().min(1, 'O estado é obrigatório'),
   complement: z.string().optional(),
-  enterprise_id: z.string().min(1, 'O ID da empresa é obrigatório'),
 });
  
 export const createEnterpriseSchema = z.object({

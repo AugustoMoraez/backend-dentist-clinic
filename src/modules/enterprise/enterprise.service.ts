@@ -12,7 +12,11 @@ export class EnterpriseService {
   
   async create(data:Prisma.EnterpriseCreateInput) {
     
-    return await this.prisma.enterprise.create({ data })
+    return await this.prisma.enterprise.create(
+      { data:{
+        ...data,
+        address: data.address ? { create: data.address } : undefined
+      }})
   }
 
   findAll() {}
