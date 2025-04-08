@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { UpdateEnterpriseDto } from './dto/update-enterprise.dto';
+// import { UpdateEnterpriseDto } from './dto/update-enterprise.dto';
 import { DatabaseService } from '../database/database.service';
 import { Prisma } from '@prisma/client';
  
@@ -19,7 +19,7 @@ export class EnterpriseService {
 
   findOne(id: number) {}
 
-  update(id: number, UpdateEnterpriseDto: UpdateEnterpriseDto) { }
+  update(id: number, UpdateEnterpriseDto) { }
 
   remove(id: number) {}
 }
