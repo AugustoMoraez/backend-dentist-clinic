@@ -7,16 +7,31 @@ datasource db {
   url      = "postgresql://dev:pq-0pEr7q2rLCKl90d6qIg@battle-howler-5642.jxf.gcp-southamerica-east1.cockroachlabs.cloud:26257/nest?sslmode=verify-full"
 }
 
+model Address {
+  id           String  @id @default(uuid())
+  house_number String
+  street       String
+  district     String
+  city         String
+  state        String
+  complement   String?
+
+  enterprise_id String     @unique
+  enterprise    Enterprise @relation(fields: [enterprise_id], references: [id])
+}
+
 model Enterprise {
-  id           String @id @default(uuid())
-  email        String @unique
+  id           String  @id @unique @default(uuid())
+  email        String  @unique
   password     String
-  company_name String @unique
+  company_name String  @unique
   fantasy_name String
-  cnpj         String @unique
-  cpf          String @unique
+  cnpj         String? @unique
+  cpf          String? @unique
   contact_1    String
-  contact_2    String
+  contact_2    String?
+
+  address Address?
 }
 
 enum crdb_internal_region {
