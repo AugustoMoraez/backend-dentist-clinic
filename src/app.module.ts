@@ -3,7 +3,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './modules/user/user.module';
 import { DatabaseModule } from './modules/database/database.module';
-import { AuthModule } from './modules/auth/auth/auth.module';
+import { AuthModule } from './modules/auth/auth.module';
+ 
  
 
 
@@ -11,7 +12,7 @@ import { AuthModule } from './modules/auth/auth/auth.module';
   imports: [
     UserModule,
     DatabaseModule,
-    AuthModule,
+    AuthModule
   ],
   controllers: [AppController],
   providers: [AppService],
