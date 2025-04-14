@@ -8,13 +8,13 @@ const cpfValidator = (cpf: string) => {
   const checkDigits = (start: number, end: number) => {
     let sum = 0;
     for (let i = start; i < end; i++) {
-      sum += digits[i] * (end - i);
+      sum += digits[i] * (end + 1 - i); // <- nota: end+1 aqui é o peso certo
     }
     const remainder = sum % 11;
     return remainder < 2 ? 0 : 11 - remainder;
   };
   const firstCheckDigit = checkDigits(0, 9);
-  const secondCheckDigit = checkDigits(1, 10);
+  const secondCheckDigit = checkDigits(0, 10);
   return digits[9] === firstCheckDigit && digits[10] === secondCheckDigit;
 };
 
@@ -22,7 +22,6 @@ export const cpf = z.string().refine(cpfValidator, {
   message: 'CPF inválido',
 });
 
- 
 const cnpjValidator = (cnpj: string) => {
   cnpj = cnpj.replace(/[^\d]+/g, ''); // Remove caracteres não numéricos
   if (cnpj.length !== 14 || /^(\d)\1{13}$/.test(cnpj)) return false; // Verifica CNPJs repetidos
@@ -38,13 +37,15 @@ const cnpjValidator = (cnpj: string) => {
   const multipliers1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
   const multipliers2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
   const firstCheckDigit = checkDigits(0, 12, multipliers1);
-  const secondCheckDigit = checkDigits(1, 13, multipliers2);
+  const secondCheckDigit = checkDigits(0, 13, multipliers2); // <- corrigido aqui
   return digits[12] === firstCheckDigit && digits[13] === secondCheckDigit;
 };
 
 export const cnpj = z.string().refine(cnpjValidator, {
   message: 'CNPJ inválido',
 });
+
+
 
  
 export const AddressSchema = z.object({

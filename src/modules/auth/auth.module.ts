@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { DatabaseModule } from '../database/database.module';
 import { DatabaseService } from '../database/database.service';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -14,6 +13,7 @@ import { ConfigService } from '@nestjs/config';
       signOptions:{expiresIn:"30s"}
     })
   })],
+  exports:[JwtModule],
   controllers: [AuthController],
   providers: [AuthService,DatabaseService],
 })
