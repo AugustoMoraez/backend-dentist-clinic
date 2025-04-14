@@ -2,6 +2,10 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum crdb_internal_region {
+  gcp_southamerica_east1 @map("gcp-southamerica-east1")
+}
+
 datasource db {
   provider = "cockroachdb"
   url      = "postgresql://dev:pq-0pEr7q2rLCKl90d6qIg@battle-howler-5642.jxf.gcp-southamerica-east1.cockroachlabs.cloud:26257/nest?sslmode=verify-full"
@@ -34,6 +38,3 @@ model User {
   address Address?
 }
 
-enum crdb_internal_region {
-  gcp_southamerica_east1 @map("gcp-southamerica-east1")
-}
