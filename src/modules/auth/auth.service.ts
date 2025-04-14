@@ -9,7 +9,7 @@ export class AuthService {
 
   async login(data: { email: string; password: string }): Promise<UserModel> {
     const user = await this.prisma.user.findUnique({
-      where: { email: data.email },
+      where: { email: data.email }
     });
 
     if (!user) {

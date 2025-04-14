@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { UserModule } from './modules/user/user.module';
 import { DatabaseModule } from './modules/database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
  
  
 
@@ -12,7 +13,8 @@ import { AuthModule } from './modules/auth/auth.module';
   imports: [
     UserModule,
     DatabaseModule,
-    AuthModule
+    AuthModule,
+    ConfigModule.forRoot({isGlobal:true})
   ],
   controllers: [AppController],
   providers: [AppService],
