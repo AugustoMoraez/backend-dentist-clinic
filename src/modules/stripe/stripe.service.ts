@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import Stripe from 'stripe';
-import { StripeModule } from './stripe.module';
+
 
 @Injectable()
 export class StripeService {
@@ -31,6 +31,7 @@ export class StripeService {
             cancel_url: 'http://localhost:3000/cancel',  
             customer:id
         })
+        return { sessionId: session.id }
     }
     async registerCustomer (data:Prisma.UserCreateInput){
          
