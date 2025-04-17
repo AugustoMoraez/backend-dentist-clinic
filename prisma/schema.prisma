@@ -42,7 +42,7 @@ model User {
   address      Address?
 
   subscription Subs_Status @default(NULL)
-  stripe_id    String
+  stripe_id    String?
 }
  
 
