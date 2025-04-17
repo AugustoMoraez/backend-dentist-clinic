@@ -17,8 +17,8 @@ export class UserController {
 
   @Post("register")
   async create(@Body((new ZodValidationPipe(createUserSchema))) data:Prisma.UserCreateInput):Promise<UserModel> {
-    const {id:stripe_id} = await this.stripeService.registerCustomer(data);
-    return this.UserService.create({...data,stripe_id});
+    const {stripe_id,account} = await this.stripeService.createUserAccountStripe(data);
+    return this.UserService.create({...data,stripe_id,account_id:account.id});
   }
   
   @UseGuards(JwtAuthGuard)
@@ -27,11 +27,6 @@ export class UserController {
     return "user"
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) { }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateEnterpriseDto) { }
 
   @Delete(':id')
   remove(@Param('id') id: string) {}

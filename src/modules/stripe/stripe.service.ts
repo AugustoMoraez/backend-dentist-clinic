@@ -33,14 +33,24 @@ export class StripeService {
         })
         return { sessionId: session.id }
     }
-    async registerCustomer (data:Prisma.UserCreateInput){
-         
-        const customer = await this.stripe.customers.create({
-            name:data.name as string,
-            email:data.email
-            
-        })
-        return customer;
+    async createUserAccountStripe (data:Prisma.UserCreateInput){
+      const account = await this.stripe.accounts.create({
+        type: 'express',
+        email: data.email, 
+        metadata: {
+          userId: data.id as string, 
+        },
+      }) 
+      const customer = await this.stripe.customers.create({
+        name:data.name as string,
+        email:data.email,
+        metadata:{
+          id_user:data.id as string,
+          id_account_express:account.id
+        }
+
+      })
+      return {stripe_id:customer.id,account};
     }
 
 

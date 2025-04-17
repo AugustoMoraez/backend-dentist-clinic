@@ -34,7 +34,7 @@ model User {
   id           String  @id @unique @default(uuid())
   email        String  @unique
   password     String
-  name String?
+  name         String?
   cnpj         String? @unique
   cpf          String? @unique
   contact_1    String
@@ -43,6 +43,7 @@ model User {
 
   subscription Subs_Status @default(NULL)
   stripe_id    String?
+  account_id   String?
 }
  
 
