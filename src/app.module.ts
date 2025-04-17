@@ -5,6 +5,8 @@ import { UserModule } from './modules/user/user.module';
 import { DatabaseModule } from './modules/database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
+import { StripeModule } from './modules/stripe/stripe.module';
+ 
  
  
 
@@ -14,7 +16,9 @@ import { ConfigModule } from '@nestjs/config';
     UserModule,
     DatabaseModule,
     AuthModule,
-    ConfigModule.forRoot({isGlobal:true})
+    StripeModule,
+    ConfigModule.forRoot({isGlobal:true}),
+     
   ],
   controllers: [AppController],
   providers: [AppService],
