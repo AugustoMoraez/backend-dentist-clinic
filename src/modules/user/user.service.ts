@@ -25,11 +25,5 @@ export class UserService {
       return {...user,token:this.jwtService.sign(payload)}
   }
 
-  findAll() {}
-
-  findOne(id: number) {}
-
-  update(id: number, UpdateEnterpriseDto) { }
-
-  remove(id: number) {}
+  
 }
