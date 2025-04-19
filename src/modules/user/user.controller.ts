@@ -5,6 +5,7 @@ import { ZodValidationPipe } from 'src/zod.validatePipe';
 import {createUserSchema } from './schemas/create-user.schema';
 import { JwtAuthGuard } from '../auth/jwt.guard';
 import { StripeService } from '../stripe/stripe.service';
+import { v4 } from 'uuid';
  
 
 
@@ -17,7 +18,7 @@ export class UserController {
 
   @Post("register")
   async create(@Body((new ZodValidationPipe(createUserSchema))) data:Prisma.UserCreateInput):Promise<UserModel> {
-    const {stripe_id,stripe_connect_id} = await this.stripeService.createUserAccountConnect(data);
+    const {stripe_id,stripe_connect_id} = await this.stripeService.createUserAccountConnect({...data,id:v4()});
     return this.UserService.create({...data,stripe_id,account_connect_id:stripe_connect_id});
   }
   
