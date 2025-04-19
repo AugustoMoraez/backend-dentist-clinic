@@ -17,8 +17,8 @@ export class UserController {
 
   @Post("register")
   async create(@Body((new ZodValidationPipe(createUserSchema))) data:Prisma.UserCreateInput):Promise<UserModel> {
-    const {stripe_id,account} = await this.stripeService.createUserAccountStripe(data);
-    return this.UserService.create({...data,stripe_id,account_id:account.id});
+    const {stripe_id,stripe_connect_id} = await this.stripeService.createUserAccountConnect(data);
+    return this.UserService.create({...data,stripe_id,account_connect_id:stripe_connect_id});
   }
   
   @UseGuards(JwtAuthGuard)

@@ -43,7 +43,7 @@ model User {
 
   subscription Subs_Status @default(NULL)
   stripe_id    String?
-  account_id   String?
+  account_connect_id   String?
 }
  
 
