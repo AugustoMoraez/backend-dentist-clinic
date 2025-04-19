@@ -29,23 +29,22 @@ export class StripeService {
   }
   
   async createUserAccountConnect (data:Prisma.UserCreateInput){
+    const customer = await this.stripe.customers.create({
+      name:data.name as string,
+      email:data.email,
+      metadata:{
+        CompanyClient:"Mira Cobranca"
+      }
+
+    })
     const accountConnect = await this.stripe.accounts.create({
       type: 'express',
       email: data.email, 
 
       metadata: {
-        userId: data.id as string
+        customerID:customer.id
       },
     }) 
-    const customer = await this.stripe.customers.create({
-      name:data.name as string,
-      email:data.email,
-      metadata:{
-        id_user:data.id as string,
-        id_account_express:accountConnect.id
-      }
-
-    })
     return {stripe_id:customer.id,stripe_connect_id:accountConnect.id};
   }
 
