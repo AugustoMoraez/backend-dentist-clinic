@@ -44,6 +44,7 @@ model User {
 
   subscription_Status Subs_Status @default(NULL)
   subscription_id String?
+  currentPeriodEnd  DateTime?
   stripe_id    String?
   stripe_connect_id   String?
 }
