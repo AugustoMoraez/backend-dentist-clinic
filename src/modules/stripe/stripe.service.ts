@@ -52,4 +52,27 @@ export class StripeService {
     const list = await this.stripe.accounts.list({limit:10})
     return list;
   }
+  async handleWebhookEvent(payload: Buffer, signature: string) {
+    const event = this.stripe.webhooks.constructEvent(
+      payload,
+      signature,
+      process.env.WEB_HOOK as string
+    );
+  
+    switch (event.type) {
+      case 'checkout.session.completed':
+        const session = event.data.object;
+        // atualizar banco, ativar assinatura, etc.
+        break;
+  
+      case 'invoice.payment_failed':
+        // notificar usuário ou cancelar assinatura
+        break;
+  
+      // outros eventos...
+  
+      default:
+        console.log(`Evento não tratado: ${event.type}`);
+    }
+  }
 }
