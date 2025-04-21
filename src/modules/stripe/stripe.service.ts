@@ -7,49 +7,49 @@ import Stripe from 'stripe';
 @Injectable()
 export class StripeService {
   private stripe: Stripe
-  
+
   constructor(private config: ConfigService) {
-    this.stripe = new Stripe(this.config.get("STRIPE_SECRET_KEY") as string, {apiVersion:"2025-03-31.basil"})
+    this.stripe = new Stripe(this.config.get("STRIPE_SECRET_KEY") as string, { apiVersion: "2025-03-31.basil" })
   }
 
-  async createCheckoutSession (id:string){
+  async createCheckoutSession(id: string) {
     const session = await this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [{
-        price: this.config.get('PRICE_ID'), 
+        price: this.config.get('PRICE_ID'),
         quantity: 1,
       }
-        ],
+      ],
       mode: 'subscription',
-      success_url: 'http://localhost:3000/success', 
-      cancel_url: 'http://localhost:3000/cancel',  
-      customer:id
+      success_url: 'http://localhost:3000/success',
+      cancel_url: 'http://localhost:3000/cancel',
+      customer: id
     })
-    return { sessionId: session.id,sessionURL:session.url }
+    return { sessionId: session.id, sessionURL: session.url }
   }
-  
-  async createUserAccountConnect (data:Prisma.UserCreateInput){
+
+  async createUserAccountConnect(data: Prisma.UserCreateInput) {
     const customer = await this.stripe.customers.create({
-      name:data.name as string,
-      email:data.email,
-      metadata:{
-        CompanyClient:"Mira Cobranca"
+      name: data.name as string,
+      email: data.email,
+      metadata: {
+        CompanyClient: "Mira Cobranca"
       }
 
     })
     const accountConnect = await this.stripe.accounts.create({
       type: 'express',
-      email: data.email, 
+      email: data.email,
 
       metadata: {
-        customerID:customer.id
+        customerID: customer.id
       },
-    }) 
-    return {stripe_id:customer.id,stripe_connect_id:accountConnect.id};
+    })
+    return { stripe_id: customer.id, stripe_connect_id: accountConnect.id };
   }
 
   async listAccountsConnect() {
-    const list = await this.stripe.accounts.list({limit:10})
+    const list = await this.stripe.accounts.list({ limit: 10 })
     return list;
   }
   async handleWebhookEvent(payload: Buffer, signature: string) {
@@ -58,19 +58,34 @@ export class StripeService {
       signature,
       process.env.WEB_HOOK as string
     );
-  
+
     switch (event.type) {
       case 'checkout.session.completed':
-        const session = event.data.object;
-        // atualizar banco, ativar assinatura, etc.
+        // tratar sucesso do checkout
+         
         break;
-  
+
+      case 'invoice.paid':
+        // tratar pagamento bem-sucedido de fatura
+        
+        break;
+
       case 'invoice.payment_failed':
-        // notificar usuário ou cancelar assinatura
+        // tratar falha no pagamento da fatura
         break;
-  
-      // outros eventos...
-  
+
+      case 'customer.subscription.updated':
+        // tratar atualização na assinatura (upgrade/downgrade/cancelamento agendado)
+        break;
+
+      case 'customer.subscription.deleted':
+        // tratar cancelamento de assinatura
+        break;
+
+      case 'customer.subscription.created':
+        // assinatura nova criada
+        break;
+
       default:
         console.log(`Evento não tratado: ${event.type}`);
     }

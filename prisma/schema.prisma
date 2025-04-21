@@ -27,6 +27,7 @@ model Address {
 enum Subs_Status {
   NULL
   ACTIVE
+  PEDING
   DISABLED
 }
 
@@ -41,9 +42,10 @@ model User {
   contact_2    String?
   address      Address?
 
-  subscription Subs_Status @default(NULL)
+  subscription_Status Subs_Status @default(NULL)
+  subscription_id String?
   stripe_id    String?
-  account_connect_id   String?
+  stripe_connect_id   String?
 }
  
 
