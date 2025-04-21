@@ -37,4 +37,12 @@ export class UserService {
   }
 
 
+  async deleteAllUsers() {
+    await this.prisma.address.deleteMany();
+  
+    const result = await this.prisma.user.deleteMany();
+    
+    return result; 
+  }
+
 }

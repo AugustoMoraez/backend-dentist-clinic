@@ -29,6 +29,11 @@ export class UserController {
   }
 
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {}
+  @Delete('all')
+  async deleteAllUsers() {
+    const result = await this.UserService.deleteAllUsers();
+    return {
+      message: `${result.count} usuários deletados com sucesso.`,
+    };
+  }
 }
