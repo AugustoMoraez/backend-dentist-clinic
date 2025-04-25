@@ -8,7 +8,7 @@ import { User as UserModel } from '@prisma/client';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Get("login")
+  @Post("login")
   create(@Body((new ZodValidationPipe(loginSchema))) data:{email:string,password:string}):Promise<UserModel> {
     return this.authService.login(data);
   }
