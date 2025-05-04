@@ -13,19 +13,17 @@ export class UserService {
   constructor
   (@Inject() private prisma: DatabaseService, 
   private jwtService: JwtService,
- private StripeService :StripeService) { }
+ ) { }
 
   async create(data: Prisma.UserCreateInput) {
     await this.validateUniqueFields(data);
     const hashPassword = await b.hash(data.password, 10);
-    const {stripe_connect_id,stripe_id} = await this.StripeService.createAccountConnect(data);
+     
     const user = await this.prisma.user.create(
       {
         data: {
           ...data,
           password: hashPassword,
-          stripe_id,
-          stripe_connect_id,
           address: data.address ? { create: data.address } : undefined,
         }
       })

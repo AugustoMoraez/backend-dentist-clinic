@@ -18,20 +18,14 @@ export class UserController {
 
   @Post("register")
   async create(@Body((new ZodValidationPipe(createUserSchema))) data:Prisma.UserCreateInput):Promise<UserModel> {
-    const {stripe_id,stripe_connect_id} = await this.stripeService.createUserAccountConnect(data);
-    // const currentPeriodEnd = this.generateCurrentPeriodEnd();
+    const {stripe_id,stripe_connect_id} = await this.stripeService.createAccountConnect(data);
     return this.UserService.create({
       ...data,
       stripe_id,
       stripe_connect_id,
-      // currentPeriodEnd
     });
   }
-  // private generateCurrentPeriodEnd(): Date {
-  //   const now = new Date();
-  //   now.setDate(now.getDate() + 30); 
-  //   return now;
-  // }
+ 
   
   @UseGuards(JwtAuthGuard)
   @Get("teste")

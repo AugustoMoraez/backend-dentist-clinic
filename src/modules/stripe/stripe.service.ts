@@ -2,13 +2,17 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Prisma } from '@prisma/client';
 import Stripe from 'stripe';
+import { DatabaseService } from '../database/database.service';
 
 
 @Injectable()
 export class StripeService {
   private stripe: Stripe
+   
 
-  constructor(private config: ConfigService) {
+  constructor(
+    private config: ConfigService,
+    private prisma: DatabaseService ) {
     this.stripe = new Stripe(this.config.get("STRIPE_SECRET_KEY") as string, { apiVersion: "2025-03-31.basil" })
   }
 
@@ -21,18 +25,18 @@ export class StripeService {
       }
       ],
       mode: 'subscription',
-      success_url: 'http://localhost:3000/success',
-      cancel_url: 'http://localhost:3000/cancel',
+      success_url: 'http://localhost:5173/dashboard',
+      cancel_url: 'http://localhost:5173/',
       customer: id
     })
     return { sessionId: session.id, sessionURL: session.url }
   }
 
 
-  async createAccountStripe({name,email}:Prisma.UserCreateInput){
+  async createAccountStripe({ name, email }: Prisma.UserCreateInput) {
     const customer = await this.stripe.customers.create({
       name: name as string,
-      email:email,
+      email: email,
       metadata: {
         CompanyClient: "Mira Cobranca"
       }
@@ -41,7 +45,7 @@ export class StripeService {
   }
 
   async createAccountConnect(data: Prisma.UserCreateInput) {
-    
+
     const customerID = await this.createAccountStripe(data)
     const accountConnect = await this.stripe.accounts.create({
       type: 'express',
@@ -58,42 +62,92 @@ export class StripeService {
     const list = await this.stripe.accounts.list({ limit: 10 })
     return list;
   }
-  async handleWebhookEvent(payload: Buffer, signature: string) {
-    const event = this.stripe.webhooks.constructEvent(
-      payload,
-      signature,
-      process.env.WEB_HOOK as string
-    );
 
+  async handleWebhookEvent(payload: Buffer, signature: string): Promise<void> {
+    let event: Stripe.Event;
+  
+    try {
+      event = this.stripe.webhooks.constructEvent(
+        payload,
+        signature,
+        this.config.get("WEB_HOOK") as string
+      );
+      console.log(`✅ Evento recebido: ${event.type}`);
+    } catch (err) {
+      console.error('❌ Erro na verificação da assinatura do webhook:', err.message);
+      throw new Error(`Webhook signature verification failed: ${err.message}`);
+    }
+  
     switch (event.type) {
-      case 'checkout.session.completed':
-        // tratar sucesso do checkout
-         
+      case 'checkout.session.completed': {
+        const session = event.data.object as Stripe.Checkout.Session;
+  
+        const customerId = session.customer as string;
+        const subscriptionId = session.subscription as string;
+  
+        if (!customerId || !subscriptionId) {
+          console.warn("⚠️ Dados ausentes no evento checkout.session.completed");
+          break;
+        }
+  
+        try {
+          const customer = await this.stripe.customers.retrieve(customerId) as Stripe.Customer;
+          const email = customer.email;
+          const expirationDate = new Date();
+          expirationDate.setDate(expirationDate.getDate() + 30);
+          if (!email) {
+            console.warn("⚠️ Email do cliente não encontrado.");
+            break;
+          }
+  
+          await this.prisma.user.update({
+            where: { email },
+            data: {
+              subscription_id: subscriptionId,
+              subscription_Status: 'ACTIVE',
+              currentPeriodEnd:expirationDate
+            }
+          });
+  
+          console.log(`✅ Assinatura ativada para o usuário com email: ${email}`);
+        } catch (err) {
+          console.error("❌ Erro ao atualizar o usuário com subscription_id:", err);
+        }
+  
         break;
-
-      case 'invoice.paid':
-        // tratar pagamento bem-sucedido de fatura
-        
+      }
+  
+      case 'invoice.paid': {
+        // Exemplo: pode ser usado para marcar pagamentos como confirmados
+        console.log('✅ Fatura paga');
         break;
-
-      case 'invoice.payment_failed':
-        // tratar falha no pagamento da fatura
+      }
+  
+      case 'invoice.payment_failed': {
+        console.warn('⚠️ Pagamento da fatura falhou');
         break;
-
-      case 'customer.subscription.updated':
-        // tratar atualização na assinatura (upgrade/downgrade/cancelamento agendado)
+      }
+  
+      case 'customer.subscription.updated': {
+        console.log('🔄 Assinatura atualizada');
         break;
-
-      case 'customer.subscription.deleted':
-        // tratar cancelamento de assinatura
+      }
+  
+      case 'customer.subscription.deleted': {
+        console.log('🗑️ Assinatura cancelada');
         break;
-
-      case 'customer.subscription.created':
-        // assinatura nova criada
+      }
+  
+      case 'customer.subscription.created': {
+        console.log('🆕 Assinatura criada');
         break;
-
-      default:
-        console.log(`Evento não tratado: ${event.type}`);
+      }
+  
+      default: {
+        console.log(`ℹ️ Evento não tratado: ${event.type}`);
+        break;
+      }
     }
   }
+  
 }

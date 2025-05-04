@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import * as bodyParser from 'body-parser';
 import cors from "cors";
+import { json } from 'express';
 
 
 async function bootstrap() {
@@ -12,6 +13,7 @@ async function bootstrap() {
     transform:true
   }))
   app.use('/stripe/webhook', bodyParser.raw({ type: 'application/json' }));
+  app.use(json());
   app.use(cors({
     origin: "http://localhost:5173", 
     credentials: true

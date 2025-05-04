@@ -18,17 +18,21 @@ export class StripeController {
   getUsers(){
     return this.stripeService.listAccountsConnect()
   }
+
+  
   @Get("checkout/:id")
   getCheckoutUrl(@Param("id")id:string){
     return this.stripeService.createCheckoutSession(id)
   }
+
+
   @Post('webhook')
   async handleWebhook(
     @Req() req: Request,
     @Res() res: Response,
     @Headers('stripe-signature') signature: string,
   ) {
-    const rawBody = (req as any).rawBody;
+    const rawBody = req.body; 
 
     try {
       await this.stripeService.handleWebhookEvent(rawBody, signature);
