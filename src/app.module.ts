@@ -6,6 +6,7 @@ import { DatabaseModule } from './modules/database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { StripeModule } from './modules/stripe/stripe.module';
+import { MailerCustomModule } from './modules/mailer/mailer.module';
  
  
  
@@ -18,6 +19,7 @@ import { StripeModule } from './modules/stripe/stripe.module';
     AuthModule,
     StripeModule,
     ConfigModule.forRoot({isGlobal:true}),
+    MailerCustomModule,
      
   ],
   controllers: [AppController],

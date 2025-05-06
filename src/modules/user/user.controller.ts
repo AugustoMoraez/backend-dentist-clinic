@@ -3,7 +3,7 @@ import { UserService } from './user.service';
 import { User as UserModel, Prisma } from '@prisma/client';
 import { ZodValidationPipe } from 'src/zod.validatePipe';
 import {createUserSchema } from './schemas/create-user.schema';
-import { JwtAuthGuard } from '../auth/jwt.guard';
+import { JwtAuthGuard } from '../auth/JWT/jwt.guard';
 import { StripeService } from '../stripe/stripe.service';
 import { v4 } from 'uuid';
  
