@@ -1,4 +1,4 @@
-import { Inject, Injectable, InternalServerErrorException, NotFoundException, ServiceUnavailableException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, InternalServerErrorException, NotFoundException, ServiceUnavailableException, UnauthorizedException } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
@@ -7,11 +7,11 @@ import { MailService } from '../mailer/mailer.service';
 
 @Injectable()
 export class AuthService {
-  constructor(@Inject() 
-  private prisma: DatabaseService, 
-  private jwtService:JwtService,
-  private mailService:MailService
-) {}
+  constructor(@Inject()
+  private prisma: DatabaseService,
+    private jwtService: JwtService,
+    private mailService: MailService
+  ) { }
 
   async login(data: { email: string; password: string }) {
     const user = await this.prisma.user.findUnique({
@@ -28,61 +28,65 @@ export class AuthService {
       throw new UnauthorizedException('Senha incorreta');
     }
 
-    const payload = {username:user.email,sub:user.id};
+    const payload = { username: user.email, sub: user.id };
 
-    return {...user,token:this.jwtService.sign(payload)};
+    return { ...user, token: this.jwtService.sign(payload) };
 
   }
-  async handleForgotPassword(email:string){
+  async handleForgotPassword(email: string) {
+    const token = randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 1000 * 60 * 30);
 
-  const token = randomBytes(32).toString('hex');
-  const expiresAt = new Date(Date.now() + 1000 * 60 * 30); 
-    
-  try {
-    await this.prisma.passwordResetToken.upsert({
-      where: { email },
-      update: {
-        token,
-        expiresAt,
-      },
-      create: {
-        email,
-        token,
-        expiresAt,
-      },
-    });
-    
-  } catch (error) {
-    throw new ServiceUnavailableException({
-      error: error.message ?? error,
-      message: 'Erro ao salvar token. Tente novamente mais tarde.',
-    });
-  }
+    try {
+      await this.prisma.passwordResetToken.upsert({
+        where: { email },
+        update: {
+          token,
+          expiresAt,
+        },
+        create: {
+          email,
+          token,
+          expiresAt,
+        },
+      });
+    } catch (error) {
+      throw new ServiceUnavailableException({
+        error: error.message ?? error,
+        message: 'Erro ao salvar token. Tente novamente mais tarde.',
+      });
+    }
 
-  await this.mailService.sendResetPassword(email, token);
-
-  
+    return await this.mailService.sendResetPassword(email, token);
   }
 
 
-  
-  // async resetPassword(token: string, newPassword: string) {
-  //   const record = await this.prisma.passwordResetToken.findUnique({ where: { token } });
 
-  //   if (!record || record.expiresAt < new Date()) {
-  //     throw new BadRequestException('Token inválido ou expirado');
-  //   }
+  async handleResetPassword(token: string, newPassword: string) {
+    const record = await this.prisma.passwordResetToken.findUnique({ where: { token: token } });
 
-  //   const hashed = await bcrypt.hash(newPassword, 10);
+    if (!record || record.expiresAt < new Date()) {
+      throw new BadRequestException('Token inválido ou expirado');
+    }
 
-  //   await this.prisma.user.update({
-  //     where: { id: record.userId },
-  //     data: { password: hashed },
-  //   });
 
-  //   await this.prisma.passwordResetToken.delete({ where: { token } });
+    const hashed = await bcrypt.hash(newPassword, 10);
+    try {
+      await this.prisma.user.update({
+        where: { email: record.email },
+        data: { password: hashed },
+      });
 
-  //   return { message: 'Senha redefinida com sucesso' };
-  // }
+      await this.prisma.passwordResetToken.delete({ where: { token } });
+
+    } catch (error) {
+      throw new ServiceUnavailableException({
+        erro: error,
+        msg: "Erro, tente novamente mais tarde"
+      })
+    }
+
+    return { message: 'Senha redefinida com sucesso' };
+  }
 }
 
