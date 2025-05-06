@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, InternalServerErrorException, NotFoundException, ServiceUnavailableException, UnauthorizedException } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
@@ -33,24 +33,35 @@ export class AuthService {
     return {...user,token:this.jwtService.sign(payload)};
 
   }
-  async SendLinkResetPassword(email:string){
-    const user = await this.prisma.user.findUnique({ where: { email } });
-    if (!user) throw new NotFoundException('Usuário não encontrado');
+  async handleForgotPassword(email:string){
 
-    const token = randomBytes(32).toString('hex');
-    const expiresAt = new Date(Date.now() + 1000 * 60 * 30); // 30 minutos
-
-     await this.prisma.passwordResetToken.create({
-      data:{
+  const token = randomBytes(32).toString('hex');
+  const expiresAt = new Date(Date.now() + 1000 * 60 * 30); 
+    
+  try {
+    await this.prisma.passwordResetToken.upsert({
+      where: { email },
+      update: {
         token,
         expiresAt,
-        email
-      }
-     })
-     
-     await this.mailService.sendResetPassword(email,token)
+      },
+      create: {
+        email,
+        token,
+        expiresAt,
+      },
+    });
+    
+  } catch (error) {
+    throw new ServiceUnavailableException({
+      error: error.message ?? error,
+      message: 'Erro ao salvar token. Tente novamente mais tarde.',
+    });
+  }
 
-    return { message: 'Link de redefinição enviado por e-mail.' };
+  await this.mailService.sendResetPassword(email, token);
+
+  
   }
 
 
