@@ -32,6 +32,7 @@ enum Subs_Status {
 }
 
 model User {
+  //personal data
   id           String  @id @unique @default(uuid())
   email        String  @unique
   password     String
@@ -41,17 +42,27 @@ model User {
   contact_1    String
   contact_2    String?
   address      Address?
-
+  AccountVerify Boolean @default(false)
+  
+  //stripe
   subscription_Status Subs_Status @default(NULL)
   subscription_id String?
   currentPeriodEnd  DateTime?
   stripe_id    String?
   stripe_connect_id   String?
-
-   
+  
+  
 }
 
 model PasswordResetToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  email     String    
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model AccountVerifyToken {
   id        String   @id @default(uuid())
   token     String   @unique
   email     String    
