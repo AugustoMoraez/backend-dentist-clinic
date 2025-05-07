@@ -42,7 +42,7 @@ model User {
   contact_1    String
   contact_2    String?
   address      Address?
-  AccountVerify Boolean @default(false)
+  AccountVerification Boolean @default(false)
   
   //stripe
   subscription_Status Subs_Status @default(NULL)
@@ -57,7 +57,7 @@ model User {
 model PasswordResetToken {
   id        String   @id @default(uuid())
   token     String   @unique
-  email     String    
+  email     String   @unique 
   expiresAt DateTime
   createdAt DateTime @default(now())
 }
@@ -65,7 +65,7 @@ model PasswordResetToken {
 model AccountVerifyToken {
   id        String   @id @default(uuid())
   token     String   @unique
-  email     String    
+  email     String   @unique 
   expiresAt DateTime
   createdAt DateTime @default(now())
 }

@@ -20,6 +20,18 @@ export class AuthController {
     return this.authService.login(data);
   }
 
+  @Post('request-verification')
+  async varifyAccount(@Body('email') email: string) {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user||user.AccountVerification === true) throw new NotFoundException("Usuario não encontrado ou já ativo.");
+
+    return await this.authService.handleRequestVerification(email);
+
+  }
+  @Post('verify-account')
+  async verifyAccount(@Body('token') token:string) {
+    return this.authService.handleVerificationAccount(token);
+  }
   @Post('forgot-password')
   async forgotPassword(@Body('email') email: string) {
     const user = await this.prisma.user.findUnique({ where: { email } });

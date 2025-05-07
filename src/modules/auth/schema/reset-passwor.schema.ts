@@ -6,3 +6,4 @@ export const resetPasswordSchema = z.object({
    newPassword:z.string().min(8, "deve ter no minimo 8 caracteres")
 })
 export type resetPasswordType = z.infer<typeof resetPasswordSchema>
+
