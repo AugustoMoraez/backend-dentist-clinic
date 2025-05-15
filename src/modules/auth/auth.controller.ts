@@ -21,7 +21,8 @@ export class AuthController {
   }
 
   @Post('request-verification')
-  async varifyAccount(@Body('email') email: string) {
+  async varifyAccount(@Body() body: { email: string }) {
+    const {email}=body;
     const user = await this.prisma.user.findUnique({ where: { email } });
     if (!user||user.AccountVerification === true) throw new NotFoundException("Usuario não encontrado ou já ativo.");
 
@@ -34,6 +35,7 @@ export class AuthController {
   }
   @Post('forgot-password')
   async forgotPassword(@Body('email') email: string) {
+    
     const user = await this.prisma.user.findUnique({ where: { email } });
     if (!user) throw new NotFoundException("Usuario nao encontrado");
 

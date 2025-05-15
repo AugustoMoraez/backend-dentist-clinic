@@ -1,28 +1,39 @@
-import { 
+import {
   Controller,
-  Get, 
-  Param,   
+  Get,
+  Param,
   Post,
   Headers,
   Body,
   Req,
   Res,
-  HttpStatus, } from '@nestjs/common';
+  HttpStatus,
+  BadRequestException,
+} from '@nestjs/common';
 import { Response, Request } from 'express';
 import { StripeService } from './stripe.service';
 
 @Controller('stripe')
 export class StripeController {
-  constructor(private readonly stripeService: StripeService) {}
+  constructor(private readonly stripeService: StripeService) { }
   @Get("users")
-  getUsers(){
+  getUsers() {
     return this.stripeService.listAccountsConnect()
   }
 
-  
-  @Get("checkout/:id")
-  getCheckoutUrl(@Param("id")id:string){
-    return this.stripeService.createCheckoutSession(id)
+
+  @Post("checkout/:id/:plan")
+  getCheckoutUrl(
+    @Param("id") id: string,
+    @Param("plan") plan: 'basic' | 'pro' | 'premium'
+  ) {
+
+    const validPlans = ['basic', 'pro', 'premium'];
+
+    if (!validPlans.includes(plan)) {
+      throw new BadRequestException(`Plano inválido: ${plan.toUpperCase()}`);
+    }
+    return this.stripeService.createCheckoutSession(id, plan.toLocaleUpperCase());
   }
 
 
@@ -32,7 +43,7 @@ export class StripeController {
     @Res() res: Response,
     @Headers('stripe-signature') signature: string,
   ) {
-    const rawBody = req.body; 
+    const rawBody = req.body;
 
     try {
       await this.stripeService.handleWebhookEvent(rawBody, signature);

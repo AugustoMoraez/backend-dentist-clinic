@@ -2,7 +2,6 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import * as bodyParser from 'body-parser';
-import cors from "cors";
 import { json } from 'express';
 
 
@@ -14,10 +13,11 @@ async function bootstrap() {
   }))
   app.use('/stripe/webhook', bodyParser.raw({ type: 'application/json' }));
   app.use(json());
-  app.use(cors({
-    origin: "http://localhost:5173", 
-    credentials: true
-  }))
+  app.enableCors({
+    origin: 'http://localhost:5173', 
+    credentials: true,
+  });
+  
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

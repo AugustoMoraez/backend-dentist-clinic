@@ -108,8 +108,6 @@ export class AuthService {
 
     return { message: 'Conta ativa com sucesso' };
   }
-
-
   async handleResetPassword(token: string, newPassword: string) {
     const record = await this.prisma.passwordResetToken.findUnique({ where: { token: token } });
 

@@ -30,6 +30,12 @@ enum Subs_Status {
   PEDING
   DISABLED
 }
+enum Plan {
+  BASIC
+  PRO
+  PREMIUM
+  NULL
+}
 
 model User {
   //personal data
@@ -46,6 +52,7 @@ model User {
   
   //stripe
   subscription_Status Subs_Status @default(NULL)
+  plan Plan @default(NULL)
   subscription_id String?
   currentPeriodEnd  DateTime?
   stripe_id    String?
@@ -68,6 +75,9 @@ model AccountVerifyToken {
   email     String   @unique 
   expiresAt DateTime
   createdAt DateTime @default(now())
+}
+model Customer{
+  id Int @id @default(autoincrement())
 }
 
 
