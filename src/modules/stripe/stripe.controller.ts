@@ -9,9 +9,11 @@ import {
   Res,
   HttpStatus,
   BadRequestException,
+  UseGuards,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { StripeService } from './stripe.service';
+import { JwtAuthGuard } from '../auth/JWT/jwt.guard';
 
 @Controller('stripe')
 export class StripeController {
@@ -21,7 +23,7 @@ export class StripeController {
     return this.stripeService.listAccountsConnect()
   }
 
-
+  @UseGuards(JwtAuthGuard)
   @Post("checkout/:id/:plan")
   getCheckoutUrl(
     @Param("id") id: string,
