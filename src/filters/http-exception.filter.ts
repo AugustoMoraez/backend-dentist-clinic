@@ -1,4 +1,4 @@
-import { ExceptionFilter,Catch,ArgumentsHost,HttpException,HttpStatus,Logger } from '@nestjs/common';
+import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { Response } from 'express';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
@@ -27,7 +27,29 @@ export class AllExceptionsFilter implements ExceptionFilter {
     else if (exception instanceof PrismaClientKnownRequestError) {
       if (exception.code === 'P2002') {
         status = HttpStatus.BAD_REQUEST;
-        message = `Registro já existe`; 
+
+       
+        const constraintMatch = exception.message.match(/`([^`]+_key)`/); 
+
+        if (constraintMatch && constraintMatch[1]) {
+          const rawConstraint = constraintMatch[1];
+          const fields = rawConstraint
+            .replace(/^Customer_/, '') 
+            .replace(/_key$/, '') 
+            .split('_');
+
+          
+          const fieldMap: Record<string, string> = {
+            cpf: 'CPF',
+            email: 'E-mail',
+            userID: 'Usuário'
+          };
+
+          const readableFields = fields.map(f => fieldMap[f] || f);
+          message = `Já existe um registro com os campos: ${readableFields.join(', ')}`;
+        } else {
+          message = `Registro já existe`;
+        }
       } else {
         message = `Erro do banco de dados: código ${exception.code}`;
       }
