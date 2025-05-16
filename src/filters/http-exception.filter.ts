@@ -27,13 +27,13 @@ export class AllExceptionsFilter implements ExceptionFilter {
     else if (exception instanceof PrismaClientKnownRequestError) {
       if (exception.code === 'P2002') {
         status = HttpStatus.BAD_REQUEST;
-        message = 'Registro já existe.';
+        message = `Registro já existe`; 
       } else {
         message = `Erro do banco de dados: código ${exception.code}`;
       }
     }
 
-    // Erros do Stripe (lib oficial)
+    // Erros do Stripe  
     else if (exception.raw?.type?.startsWith('Stripe')) {
       status = HttpStatus.BAD_REQUEST;
       message = 'Erro ao processar com Stripe.';
@@ -44,7 +44,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       message = exception.message;
     }
 
-    // Log do erro completo (somente no servidor)
+    // Log do erro completo  
     this.logger.error(
       `[${request.method}] ${request.url} - ${status} - ${JSON.stringify(message)}`,
       exception.stack,

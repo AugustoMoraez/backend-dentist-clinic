@@ -84,17 +84,18 @@ model AccountVerifyToken {
 model Customer {
   id                String   @id @default(cuid())
   name              String
-  email             String   @unique
+  email             String
   cpf               String
   phone             String?
   stripeCustomerId  String  
-  user              User     @relation(fields: [userId], references: [id])
-  userId            String
+  user              User     @relation(fields: [userID], references: [id])
+  userID            String
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
-  @@unique([cpf, userId])
-  @@index([userId])
+  @@unique([cpf, userID])
+  @@unique([email, userID])  
+  @@index([userID])
 }
 
 

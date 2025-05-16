@@ -33,12 +33,12 @@ export class StripeService {
   }
 
 
-  async createAccountStripe({ name, email }: Prisma.UserCreateInput) {
+  async createAccountStripe( name:string, email:string,company?:string  ) {
     const customer = await this.stripe.customers.create({
       name: name as string,
       email: email,
       metadata: {
-        CompanyClient: "Mira Assinatura"
+        CompanyClient: company?company:"Mira Assinatura"
       }
     })
     return customer.id
@@ -46,7 +46,7 @@ export class StripeService {
 
   async createAccountConnect(data: Prisma.UserCreateInput) {
 
-    const customerID = await this.createAccountStripe(data)
+    const customerID = await this.createAccountStripe(data.name as string,data.email)
     const accountConnect = await this.stripe.accounts.create({
       type: 'express',
       email: data.email,

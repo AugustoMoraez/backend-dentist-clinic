@@ -1,16 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { CustomerService } from './customer.service';
 import { ZodValidationPipe } from 'src/pipes/zod/zod.validatePipe';
 import { createCustomerSchema, createCustomerType } from './schemas/create-customer.schema';
 import { Prisma } from '@prisma/client';
+import { JwtAuthGuard } from 'src/JWT/jwt.guard';
  
 
 @Controller('customer')
 export class CustomerController {
   constructor(private readonly customerService: CustomerService) {}
-
+  
+  @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body((new ZodValidationPipe(createCustomerSchema))) data:Prisma.CustomerCreateInput) {
+  create(@Body((new ZodValidationPipe(createCustomerSchema))) data:createCustomerType) {
     return this.customerService.create(data);
   }
 

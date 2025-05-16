@@ -5,7 +5,7 @@ export const createCustomerSchema = z.object({
     email:z.string().email("Formato de email invalido"),
     cpf:z.string(),
     phone:z.string().optional(),
-    user:z.string()
+    userID:z.string()
 })
 
 export type createCustomerType = z.infer<typeof createCustomerSchema>
