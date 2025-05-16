@@ -1,7 +1,8 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { CustomerService } from './customer.service';
-import { ZodValidationPipe } from 'src/pipes/zod.validatePipe';
+import { ZodValidationPipe } from 'src/pipes/zod/zod.validatePipe';
 import { createCustomerSchema, createCustomerType } from './schemas/create-customer.schema';
+import { Prisma } from '@prisma/client';
  
 
 @Controller('customer')
@@ -9,7 +10,7 @@ export class CustomerController {
   constructor(private readonly customerService: CustomerService) {}
 
   @Post()
-  create(@Body((new ZodValidationPipe(createCustomerSchema))) data:createCustomerType) {
+  create(@Body((new ZodValidationPipe(createCustomerSchema))) data:Prisma.CustomerCreateInput) {
     return this.customerService.create(data);
   }
 

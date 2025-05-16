@@ -38,7 +38,7 @@ export class StripeService {
       name: name as string,
       email: email,
       metadata: {
-        CompanyClient: "Mira Cobranca"
+        CompanyClient: "Mira Assinatura"
       }
     })
     return customer.id

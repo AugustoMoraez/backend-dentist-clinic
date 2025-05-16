@@ -1,7 +1,7 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body,  Delete, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User as UserModel, Prisma } from '@prisma/client';
-import { ZodValidationPipe } from 'src/pipes/zod.validatePipe';
+import { ZodValidationPipe } from 'src/pipes/zod/zod.validatePipe';
 import {createUserSchema } from './schemas/create-user.schema';
 import { JwtAuthGuard } from '../../JWT/jwt.guard';
 import { StripeService } from '../stripe/stripe.service';

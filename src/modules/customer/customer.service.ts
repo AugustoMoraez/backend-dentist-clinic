@@ -1,10 +1,21 @@
 import { Injectable } from '@nestjs/common';
+import { createCustomerType } from './schemas/create-customer.schema';
+import { DatabaseService } from '../database/database.service';
+import { Prisma } from '@prisma/client';
 
 
 @Injectable()
 export class CustomerService {
-  create(createCustomerDto) {
-    return 'This action adds a new customer';
+  constructor(private readonly prisma:DatabaseService) {}
+  
+  async create (data:Prisma.CustomerCreateInput) {
+   
+      const customer = await this.prisma.customer.create({data})
+      return customer
+   
+            
+ 
+   
   }
 
   findAll() {
