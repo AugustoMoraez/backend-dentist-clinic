@@ -1,5 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { CustomerService } from './customer.service';
+import { ZodValidationPipe } from 'src/zod.validatePipe';
+import { createCustomerSchema, createCustomerType } from './schemas/create-customer.schema';
  
 
 @Controller('customer')
@@ -7,8 +9,8 @@ export class CustomerController {
   constructor(private readonly customerService: CustomerService) {}
 
   @Post()
-  create(@Body() createCustomerDto) {
-    return this.customerService.create(createCustomerDto);
+  create(@Body((new ZodValidationPipe(createCustomerSchema))) data:createCustomerType) {
+    return this.customerService.create(data);
   }
 
   @Get()
