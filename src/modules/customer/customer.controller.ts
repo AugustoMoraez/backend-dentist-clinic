@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { CustomerService } from './customer.service';
-import { ZodValidationPipe } from 'src/zod.validatePipe';
+import { ZodValidationPipe } from 'src/pipes/zod.validatePipe';
 import { createCustomerSchema, createCustomerType } from './schemas/create-customer.schema';
  
 
