@@ -13,25 +13,29 @@ export class CustomerController {
   @Post()
   create(@Body((new ZodValidationPipe(createCustomerSchema))) data:createCustomerType, @Request() req:any) {
     const userID = req.user.userId;
-    console.log(userID)
     return this.customerService.create(data,userID);
   }
 
-  @Get()
-  findAll() {
-    return this.customerService.findAll();
+  @UseGuards(JwtAuthGuard)
+  @Get("/all")
+  findAll(@Request() req:any) {
+    const userID = req.user.userId;
+    return this.customerService.findAll(userID);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.customerService.findOne(+id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateCustomerDto) {
     return this.customerService.update(+id, updateCustomerDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.customerService.remove(+id);

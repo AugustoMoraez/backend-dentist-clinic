@@ -24,12 +24,16 @@ export class CustomerService {
     } })
   }
 
-  findAll() {
-    return `This action returns all customer`;
+  async findAll(userID:string) {
+    const list =  await this.prisma.customer.findMany({where:{userID}})
+    return {count:list.length,data:list}
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} customer`;
+  findOne(name: string) {
+    
+    
+    
+    return null;
   }
 
   update(id: number, updateCustomerDto) {
