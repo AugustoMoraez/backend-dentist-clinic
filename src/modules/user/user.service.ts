@@ -63,13 +63,18 @@ export class UserService {
       throw new ConflictException('Já existe um usuário com esse CNPJ');
     }
   }
-  async deleteAllUsers() {
-    await this.prisma.address.deleteMany();
-  
-    const result = await this.prisma.user.deleteMany();
-    
-    return result; 
-  }
+  async deleteAllUsers()  {
+  // Deleta todos os clientes vinculados aos usuário
+  await this.prisma.customer.deleteMany({});
+
+  // Deleta todos os endereços vinculados aos usuários
+  await this.prisma.address.deleteMany({});
+
+  // Deleta os próprios usuários
+  const result = await this.prisma.user.deleteMany({});
+
+  return  result.count ;
+}
   async findByEmail(email:string){
     const user = await this.prisma.user.findUnique({where:{email}});
     return user ;

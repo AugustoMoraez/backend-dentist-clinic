@@ -26,7 +26,7 @@ export class CustomerController {
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.customerService.findOne(+id);
+    // return this.customerService.findOne(id);
   }
 
   @UseGuards(JwtAuthGuard)
