@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request }
 import { CustomerService } from './customer.service';
 import { ZodValidationPipe } from 'src/pipes/zod/zod.validatePipe';
 import { createCustomerSchema, createCustomerType } from './schemas/create-customer.schema';
-import { JwtAuthGuard } from 'src/JWT/jwt.guard';
+import { JwtAuthGuard } from 'src/modules/auth/JWT/jwt.guard';
  
 
 @Controller('customer')
