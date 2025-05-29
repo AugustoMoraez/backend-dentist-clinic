@@ -1,11 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Body, NotFoundException,  Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { loginSchema } from './schema/login.schema';
 import { ZodValidationPipe } from 'src/pipes/zod/zod.validatePipe';
-import { Prisma, User as UserModel } from '@prisma/client';
 import { DatabaseService } from '../database/database.service';
 import { resetPasswordSchema, resetPasswordType } from './schema/reset-passwor.schema';
-
+import { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -15,37 +14,57 @@ export class AuthController {
 
   ) { }
 
-  @Post("login")
-  create(@Body((new ZodValidationPipe(loginSchema))) data: { email: string, password: string }): Promise<UserModel> {
-    return this.authService.login(data);
+  @Post('login')
+  async login(
+    @Body(new ZodValidationPipe(loginSchema)) data: { email: string; password: string },
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { user, accessToken, refreshToken } = await this.authService.login(data);
+
+     
+    res.cookie('access_token', accessToken, {
+      httpOnly: true,
+      secure: false, 
+      sameSite: 'lax',  
+      maxAge: 1000 * 60 * 15,  
+    });
+
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      secure: false,  
+      sameSite: 'lax',
+      maxAge: 1000 * 60 * 60 * 24 * 7,  
+    });
+
+    return user;
   }
 
   @Post('request-verification')
   async varifyAccount(@Body() body: { email: string }) {
-    const {email}=body;
+    const { email } = body;
     const user = await this.prisma.user.findUnique({ where: { email } });
-    if (!user||user.AccountVerification === true) throw new NotFoundException("Usuario não encontrado ou já ativo.");
+    if (!user || user.AccountVerification === true) throw new NotFoundException("Usuario não encontrado ou já ativo.");
 
     return await this.authService.handleRequestVerification(email);
 
   }
   @Post('verify-account')
-  async verifyAccount(@Body('token') token:string) {
+  async verifyAccount(@Body('token') token: string) {
     return this.authService.handleVerificationAccount(token);
   }
   @Post('forgot-password')
   async forgotPassword(@Body('email') email: string) {
-    
+
     const user = await this.prisma.user.findUnique({ where: { email } });
     if (!user) throw new NotFoundException("Usuario nao encontrado");
 
     return await this.authService.handleForgotPassword(email);
 
   }
-  
+
   @Post('reset-password')
   async resetPassword(@Body((new ZodValidationPipe(resetPasswordSchema))) data: resetPasswordType) {
-    return this.authService.handleResetPassword(data.token,data.newPassword);
+    return this.authService.handleResetPassword(data.token, data.newPassword);
   }
 
 

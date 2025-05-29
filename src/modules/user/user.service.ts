@@ -3,7 +3,7 @@ import { DatabaseService } from '../database/database.service';
 import { Prisma } from '@prisma/client';
 import * as b from "bcrypt"
 import { JwtService } from '@nestjs/jwt'
-import { StripeService } from '../stripe/stripe.service';
+import { ConfigService } from '@nestjs/config';
 
 
 
@@ -11,25 +11,45 @@ import { StripeService } from '../stripe/stripe.service';
 export class UserService {
 
   constructor
-  (@Inject() private prisma: DatabaseService, 
-  private jwtService: JwtService,
- ) { }
+    (@Inject() private prisma: DatabaseService,
+      private jwtService: JwtService,
+      private config: ConfigService,
+    ) { }
 
   async create(data: Prisma.UserCreateInput) {
     await this.validateUniqueFields(data);
+
     const hashPassword = await b.hash(data.password, 10);
-     
-    const user = await this.prisma.user.create(
-      {
-        data: {
-          ...data,
-          password: hashPassword,
-          address: data.address ? { create: data.address } : undefined,
-        }
-      })
-    const payload = { username: user.email, sub: user.id };
-    return { ...user, token: this.jwtService.sign(payload) }
+
+    const user = await this.prisma.user.create({
+      data: {
+        ...data,
+        password: hashPassword,
+        address: data.address ? { create: data.address } : undefined,
+      },
+    });
+
+    const payload = { sub: user.id, email: user.email };
+
+    const accessToken = this.jwtService.sign(payload, {
+      expiresIn: '15m',
+      secret: this.config.get('JWT_ACCESS_TOKEN'),
+    });
+
+    const refreshToken = this.jwtService.sign(payload, {
+      expiresIn: '7d',
+      secret: this.config.get('JWT_REFRESH_SECRET'),
+    });
+
+    const { password, ...userWithoutPassword } = user;
+
+    return {
+      user: userWithoutPassword,
+      accessToken,
+      refreshToken,
+    };
   }
+
 
   async update(id: string, data: Partial<Prisma.UserUpdateInput>) {
     if (data.password) {
@@ -63,20 +83,20 @@ export class UserService {
       throw new ConflictException('Já existe um usuário com esse CNPJ');
     }
   }
-  async deleteAllUsers()  {
-  // Deleta todos os clientes vinculados aos usuário
-  await this.prisma.customer.deleteMany({});
+  async deleteAllUsers() {
+    // Deleta todos os clientes vinculados aos usuário
+    await this.prisma.customer.deleteMany({});
 
-  // Deleta todos os endereços vinculados aos usuários
-  await this.prisma.address.deleteMany({});
+    // Deleta todos os endereços vinculados aos usuários
+    await this.prisma.address.deleteMany({});
 
-  // Deleta os próprios usuários
-  const result = await this.prisma.user.deleteMany({});
+    // Deleta os próprios usuários
+    const result = await this.prisma.user.deleteMany({});
 
-  return  result.count ;
-}
-  async findByEmail(email:string){
-    const user = await this.prisma.user.findUnique({where:{email}});
-    return user ;
+    return result.count;
+  }
+  async findByEmail(email: string) {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    return user;
   }
 }

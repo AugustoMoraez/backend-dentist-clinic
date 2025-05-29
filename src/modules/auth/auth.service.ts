@@ -4,18 +4,20 @@ import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from '../mailer/mailer.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
   constructor(@Inject()
   private prisma: DatabaseService,
     private jwtService: JwtService,
+    private config: ConfigService,
     private mailService: MailService
   ) { }
 
-  async login(data: { email: string; password: string }) {
+   async login(data: { email: string; password: string }) {
     const user = await this.prisma.user.findUnique({
-      where: { email: data.email }
+      where: { email: data.email },
     });
 
     if (!user) {
@@ -23,15 +25,29 @@ export class AuthService {
     }
 
     const isPasswordValid = await bcrypt.compare(data.password, user.password);
-
     if (!isPasswordValid) {
       throw new UnauthorizedException('Senha incorreta');
     }
 
-    const payload = { username: user.email, sub: user.id };
+    const payload = { sub: user.id, email: user.email };
 
-    return { ...user, token: this.jwtService.sign(payload) };
+    const accessToken = this.jwtService.sign(payload, {
+      expiresIn: '15m',
+      secret: this.config.get("JWT_ACCESS_TOKEN"),
+    });
 
+    const refreshToken = this.jwtService.sign(payload, {
+      expiresIn: '7d',
+      secret: this.config.get("JWT_REFRESH_SECRET"),
+    });
+
+    const { password, ...userWithoutPassword } = user;
+
+    return {
+      user: userWithoutPassword,
+      accessToken,
+      refreshToken,
+    };
   }
   async handleRequestVerification(email: string) {
     const token = randomBytes(32).toString('hex');
@@ -39,7 +55,7 @@ export class AuthService {
 
     try {
       await this.prisma.accountVerifyToken.upsert({
-        where: {email},
+        where: { email },
         update: {
           token,
           expiresAt,
@@ -65,7 +81,7 @@ export class AuthService {
 
     try {
       await this.prisma.passwordResetToken.upsert({
-        where: {email},
+        where: { email },
         update: {
           token,
           expiresAt,
@@ -85,7 +101,7 @@ export class AuthService {
 
     return await this.mailService.sendResetPassword(email, token);
   }
-  async handleVerificationAccount(token:string){
+  async handleVerificationAccount(token: string) {
     const record = await this.prisma.accountVerifyToken.findUnique({ where: { token } });
 
     if (!record || record.expiresAt < new Date()) {
@@ -94,7 +110,7 @@ export class AuthService {
     try {
       await this.prisma.user.update({
         where: { email: record.email },
-        data: { AccountVerification:true },
+        data: { AccountVerification: true },
       });
 
       await this.prisma.accountVerifyToken.delete({ where: { token } });
