@@ -11,8 +11,12 @@ export class CustomerController {
   
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body((new ZodValidationPipe(createCustomerSchema))) data:createCustomerType, @Request() req:any) {
+  create(@Body(
+    (new ZodValidationPipe(createCustomerSchema))) 
+    data:createCustomerType,
+    @Request() req:any) {
     const userID = req.user.userId;
+    console.log(userID)
     return this.customerService.create(data,userID);
   }
 

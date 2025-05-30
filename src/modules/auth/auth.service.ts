@@ -1,10 +1,12 @@
-import { BadRequestException, Inject, Injectable, InternalServerErrorException, NotFoundException, ServiceUnavailableException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable,  ServiceUnavailableException, UnauthorizedException } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from '../mailer/mailer.service';
 import { ConfigService } from '@nestjs/config';
+import { Request,Response } from 'express';
+
 
 @Injectable()
 export class AuthService {
@@ -149,6 +151,39 @@ export class AuthService {
     }
 
     return { message: 'Senha redefinida com sucesso' };
+  }
+  refreshAccessToken(req: Request, res: Response) {
+    const refreshToken = req.cookies['refresh_token'];
+
+    if (!refreshToken) {
+      throw new UnauthorizedException('Refresh token ausente');
+    }
+
+    try {
+       
+      const payload = this.jwtService.verify(refreshToken, {
+        secret: this.config.get('JWT_REFRESH_SECRET'),
+      });
+
+      const newAccessToken = this.jwtService.sign(
+        { sub: payload.sub, email: payload.email },
+        {
+          secret: this.config.get('JWT_ACCESS_TOKEN'),
+          expiresIn: '15m',
+        },
+      );
+  
+      res.cookie('access_token', newAccessToken, {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        maxAge: 1000 * 60 * 15, 
+      });
+
+      return { message: 'Access token renovado com sucesso' };
+    } catch (error) {
+      throw new UnauthorizedException('Refresh token inválido');
+    }
   }
 }
 

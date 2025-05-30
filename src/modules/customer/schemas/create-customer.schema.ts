@@ -1,11 +1,11 @@
+import { cpf } from "src/schemas/cpf"
 import z from "zod"
+ 
 
 export const createCustomerSchema = z.object({
-    name:z.string().min(2,"Minimo duas letras"),
-    email:z.string().email("Formato de email invalido"),
-    cpf:z.string(),
-    phone:z.string().optional(),
-    
+    email: z.string().email("Email inválido"),
+    cpf:cpf,
+    name:z.string().min(2,"minimo de dois caracteres").max(40,"maximo de 40 caracteres")
 })
 
 export type createCustomerType = z.infer<typeof createCustomerSchema>

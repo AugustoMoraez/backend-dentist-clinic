@@ -12,13 +12,12 @@ export class CustomerService {
     private readonly stripe: StripeService
   ) { }
 
-  async create({name,cpf,email,phone}: createCustomerType,userID:string) {
+  async create({name,cpf,email}: createCustomerType,userID:string) {
     const stripeCustomerId= await this.stripe.createAccountStripe(name,email,userID )
     return await this.prisma.customer.create({ data:{
       name,
       cpf,
       email,
-      phone,
       stripeCustomerId,
       userID
     } })

@@ -1,17 +1,16 @@
-import { Controller, Post, Body, NotFoundException,  Res } from '@nestjs/common';
+import { Controller, Post, Body, NotFoundException, Res, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { loginSchema } from './schema/login.schema';
 import { ZodValidationPipe } from 'src/pipes/zod/zod.validatePipe';
 import { DatabaseService } from '../database/database.service';
 import { resetPasswordSchema, resetPasswordType } from './schema/reset-passwor.schema';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private authService: AuthService,
     private prisma: DatabaseService
-
   ) { }
 
   @Post('login')
@@ -21,24 +20,23 @@ export class AuthController {
   ) {
     const { user, accessToken, refreshToken } = await this.authService.login(data);
 
-     
+
     res.cookie('access_token', accessToken, {
       httpOnly: true,
-      secure: false, 
-      sameSite: 'lax',  
-      maxAge: 1000 * 60 * 15,  
+      secure: false,
+      sameSite: 'lax',
+      maxAge: 1000 * 60 * 15,
     });
 
     res.cookie('refresh_token', refreshToken, {
       httpOnly: true,
-      secure: false,  
+      secure: false,
       sameSite: 'lax',
-      maxAge: 1000 * 60 * 60 * 24 * 7,  
+      maxAge: 1000 * 60 * 60 * 24 * 7,
     });
 
     return user;
   }
-
   @Post('request-verification')
   async varifyAccount(@Body() body: { email: string }) {
     const { email } = body;
@@ -61,11 +59,16 @@ export class AuthController {
     return await this.authService.handleForgotPassword(email);
 
   }
-
   @Post('reset-password')
   async resetPassword(@Body((new ZodValidationPipe(resetPasswordSchema))) data: resetPasswordType) {
     return this.authService.handleResetPassword(data.token, data.newPassword);
   }
+
+  @Post('refresh')
+  refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    return this.authService.refreshAccessToken(req, res);
+  }
+
 
 
 
