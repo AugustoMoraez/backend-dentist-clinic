@@ -37,6 +37,17 @@ enum Plan {
   NULL
 }
 
+model Signature{
+  id                String   @id @default(uuid())
+  name              String
+  price             Float
+  stripeProductId   String?   
+  stripePriceId     String?  
+  userID            String
+  client            User   @relation(fields: [userID], references: [id])
+  createdAt         DateTime @default(now())
+}
+
 model User {
   //personal data
   id           String  @id @unique @default(uuid())
@@ -64,22 +75,7 @@ model User {
   
 
   Customer Customer[]
-}
-
-model PasswordResetToken {
-  id        String   @id @default(uuid())
-  token     String   @unique
-  email     String   @unique 
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-}
-
-model AccountVerifyToken {
-  id        String   @id @default(uuid())
-  token     String   @unique
-  email     String   @unique 
-  expiresAt DateTime
-  createdAt DateTime @default(now())
+  Signature Signature[]
 }
 model Customer {
   id                String   @id @default(cuid())
@@ -96,6 +92,22 @@ model Customer {
   @@unique([cpf, userID])
   @@unique([email, userID])  
   @@index([userID])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  email     String   @unique 
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model AccountVerifyToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  email     String   @unique 
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 }
 
 

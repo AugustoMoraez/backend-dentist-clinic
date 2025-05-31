@@ -15,7 +15,7 @@ export class StripeService {
     private prisma: DatabaseService) {
     this.stripe = new Stripe(this.config.get("STRIPE_SECRET_KEY") as string, { apiVersion: "2025-03-31.basil" })
   }
-
+  //Criar checkout de assinatura do MIRA ASSINATURAS
   async createCheckoutSession(id: string, plan: string) {
     const session = await this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],

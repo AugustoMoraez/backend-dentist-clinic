@@ -16,7 +16,6 @@ export class CustomerController {
     data:createCustomerType,
     @Request() req:any) {
     const userID = req.user.userId;
-    console.log(userID)
     return this.customerService.create(data,userID);
   }
 
