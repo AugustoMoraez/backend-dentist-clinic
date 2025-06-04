@@ -83,6 +83,7 @@ model Customer {
   email             String
   cpf               String
   phone             String?
+  subscription_Status Subs_Status @default(NULL)
   stripeCustomerId  String  
   user              User     @relation(fields: [userID], references: [id])
   userID            String

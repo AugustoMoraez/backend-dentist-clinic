@@ -8,6 +8,7 @@ import { ConfigModule } from '@nestjs/config';
 import { StripeModule } from './modules/stripe/stripe.module';
 import { MailerCustomModule } from './modules/mailer/mailer.module';
 import { CustomerModule } from './modules/customer/customer.module';
+import { SignatureModule } from './modules/signature/signature.module';
  
  
  
@@ -22,6 +23,7 @@ import { CustomerModule } from './modules/customer/customer.module';
     ConfigModule.forRoot({isGlobal:true}),
     MailerCustomModule,
     CustomerModule,
+    SignatureModule,
      
   ],
   controllers: [AppController],
