@@ -7,5 +7,6 @@ import { DatabaseService } from '../database/database.service';
 @Module({
   controllers: [StripeController],
   providers: [StripeService,ConfigService,DatabaseService],
+  exports: [StripeService],
 })
 export class StripeModule {}

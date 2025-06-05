@@ -1,8 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Prisma } from '@prisma/client';
 import Stripe from 'stripe';
 import { DatabaseService } from '../database/database.service';
+import { createProductType } from './schemas/createCustomerProduct.schema';
+import { createCustomerType } from '../customer/schemas/create-customer.schema';
+import { createPriceType } from './schemas/createCustomerPrice.schem';
 
 
 @Injectable()
@@ -15,7 +18,57 @@ export class StripeService {
     private prisma: DatabaseService) {
     this.stripe = new Stripe(this.config.get("STRIPE_SECRET_KEY") as string, { apiVersion: "2025-03-31.basil" })
   }
-  //Criar checkout de assinatura do MIRA ASSINATURAS
+
+  async createCustomerProduct({ name, description, stripeAccount }: createProductType) {
+    try {
+      const product = await this.stripe.products.create({
+        name,
+        description,
+      }, {
+        stripeAccount
+      });
+
+      return product;
+    } catch (error) {
+      console.error(`❌ Erro ao criar produto no Stripe: ${error}`);
+      throw new Error('Erro ao criar produto no Stripe.');
+    }
+  }
+  async createCustomerPrice({ unit_amount, stripeAccount, product }: createPriceType) {
+    
+    try {
+      const price = await this.stripe.prices.create({
+        unit_amount,
+        currency: 'brl',
+        recurring: {
+          interval: 'month',
+        },
+        product,
+      }, {
+        stripeAccount
+      });
+      return price;
+    } catch (error) {
+      console.error(`❌ Erro ao criar price no Stripe: ${error}`);
+      throw new Error('Erro ao criar price no Stripe.');
+    }
+  }
+
+  async deleteCustomer(customerId: string): Promise<void> {
+    try {
+      await this.stripe.customers.del(customerId);
+    } catch (error) {
+      throw new Error(`Erro ao deletar cliente do Stripe: ${error.message}`);
+    }
+  }
+
+  async deleteConnectAccount(accountId: string): Promise<void> {
+    try {
+      await this.stripe.accounts.del(accountId);
+    } catch (error) {
+      throw new Error(`Erro ao deletar conta Connect do Stripe: ${error.message}`);
+    }
+  }
   async createCheckoutSession(id: string, plan: string) {
     const session = await this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -30,15 +83,32 @@ export class StripeService {
       customer: id
     })
     return { sessionId: session.id, sessionURL: session.url, plan }
+
   }
 
+  async createAccountOnboardingLink(stripeAccountId: string): Promise<string> {
+    try {
+      const link = await this.stripe.accountLinks.create({
+        account: stripeAccountId,
+        refresh_url: 'http://localhost:5173/stripe-verification/erro',
+        return_url: 'http://localhost:5173/stripe-verification/sucesso',
+        type: 'account_onboarding',
+      });
+      return link.url;
+    } catch (error) {
+      if (error instanceof Stripe.errors.StripeInvalidRequestError) {
+        throw new BadRequestException('ID da conta Stripe inválido.');
+      }
+      throw new InternalServerErrorException('Erro ao gerar link Stripe.');
+    }
+  }
 
-  async createAccountStripe( name:string, email:string,company?:string  ) {
+  async createAccountStripe(name: string, email: string, company?: string) {
     const customer = await this.stripe.customers.create({
       name: name as string,
       email: email,
       metadata: {
-        CompanyClient: company?company:"Mira Assinatura"
+        CompanyClient: company ? company : "Mira Assinatura"
       }
     })
     return customer.id
@@ -46,7 +116,7 @@ export class StripeService {
 
   async createAccountConnect(data: Prisma.UserCreateInput) {
 
-    const customerID = await this.createAccountStripe(data.name as string,data.email)
+    const customerID = await this.createAccountStripe(data.name as string, data.email)
     const accountConnect = await this.stripe.accounts.create({
       type: 'express',
       email: data.email,

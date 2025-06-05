@@ -7,9 +7,12 @@ import { ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './JWT/jwt.strategy';
 import { UserService } from '../user/user.service';
 import { MailService } from '../mailer/mailer.service';
+import { StripeModule } from '../stripe/stripe.module';
 
 @Module({
-  imports: [JwtModule.registerAsync({
+  imports: [
+     StripeModule,
+    JwtModule.registerAsync({
     inject: [ConfigService],
     useFactory: (config: ConfigService) => ({
       secret: "123",

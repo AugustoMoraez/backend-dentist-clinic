@@ -16,6 +16,7 @@ import { StripeService } from './stripe.service';
 import { JwtAuthGuard } from '../auth/JWT/jwt.guard';
 
 @Controller('stripe')
+@UseGuards(JwtAuthGuard)
 export class StripeController {
   constructor(private readonly stripeService: StripeService) { }
   @Get("users")
@@ -23,7 +24,16 @@ export class StripeController {
     return this.stripeService.listAccountsConnect()
   }
 
-  @UseGuards(JwtAuthGuard)
+  @Get('account-link-generate/:stripeAccountId')
+  async generateLink(@Param('stripeAccountId') stripeAccountId: string) {
+    if (!stripeAccountId) {
+      return { error: 'stripeAccountId é obrigatório.' };
+    }
+
+    const url = await this.stripeService.createAccountOnboardingLink(stripeAccountId);
+    return { url };
+  }
+  
   @Post("checkout/:id/:plan")
   getCheckoutUrl(
     @Param("id") id: string,

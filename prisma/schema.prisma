@@ -40,7 +40,7 @@ enum Plan {
 model Signature{
   id                String   @id @default(uuid())
   name              String
-  price             Float
+  unit_amount       String
   stripeProductId   String?   
   stripePriceId     String?  
   userID            String
@@ -62,6 +62,7 @@ model User {
   AccountVerification Boolean @default(false)
   
   //stripe
+  stripe_verification Boolean @default(false)
   subscription_Status Subs_Status @default(NULL)
   plan Plan @default(NULL)
   subscription_id String?
