@@ -40,7 +40,7 @@ enum Plan {
 model Signature{
   id                String   @id @default(uuid())
   name              String
-  unit_amount       String
+  unit_amount       Int
   stripeProductId   String?   
   stripePriceId     String?  
   userID            String

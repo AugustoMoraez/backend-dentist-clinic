@@ -11,15 +11,38 @@ export class SignatureService {
     private prisma: DatabaseService
   ) { }
   async create({ description, name, stripeAccount, unit_amount }: createSignatureType) {
-    const user = await this.prisma.user.findUnique({
-      where: { stripe_connect_id:stripeAccount  },
+    const user = await this.prisma.user.findMany({
+      where: { stripe_connect_id: stripeAccount },
     });
 
-    if (!user || !user.stripe_connect_id) {
+    if (!user[0] || !user[0].stripe_connect_id) {
       throw new Error("Usuário não encontrado ou sem conta Stripe Connect");
     }
 
-    const stripeAccountID = user.stripe_connect_id;
+    const stripeAccountID = user[0].stripe_connect_id;
+
+    const product = await this.stripe.createCustomerProduct({
+      name,
+      description,
+      stripeAccount,
+    });
+
+    const price = await this.stripe.createCustomerPrice({
+      unit_amount,
+      product: product.id,
+      stripeAccount:stripeAccountID,
+    });
+
+    const signature = await this.prisma.signature.create({
+    data: {
+      name ,
+      unit_amount , // salva em reais como string
+      stripeProductId: product.id,
+      stripePriceId: price.id,
+      userID: user.id,
+    },
+  });
+
   }
 
 }
