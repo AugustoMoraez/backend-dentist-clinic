@@ -35,14 +35,15 @@ export class SignatureService {
 
     const signature = await this.prisma.signature.create({
     data: {
-      name ,
-      unit_amount , // salva em reais como string
+      name,
+      unit_amount,  
       stripeProductId: product.id,
       stripePriceId: price.id,
-      userID: user.id,
+      userID: user[0].id,
     },
   });
 
+  return signature;
   }
 
 }
