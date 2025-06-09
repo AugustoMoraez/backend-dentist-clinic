@@ -67,8 +67,8 @@ model User {
   plan Plan @default(NULL)
   subscription_id String?
   currentPeriodEnd  DateTime?
-  stripe_id    String?
-  stripe_connect_id   String?
+  stripe_id    String? @unique
+  stripe_connect_id   String?  @unique
   
   //timestamp
   createdAt         DateTime @default(now())

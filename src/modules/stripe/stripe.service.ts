@@ -4,7 +4,6 @@ import { Prisma } from '@prisma/client';
 import Stripe from 'stripe';
 import { DatabaseService } from '../database/database.service';
 import { createProductType } from './schemas/createCustomerProduct.schema';
-import { createCustomerType } from '../customer/schemas/create-customer.schema';
 import { createPriceType } from './schemas/createCustomerPrice.schem';
 
 
@@ -53,7 +52,6 @@ export class StripeService {
       throw new Error('Erro ao criar price no Stripe.');
     }
   }
-
   async deleteCustomer(customerId: string): Promise<void> {
     try {
       await this.stripe.customers.del(customerId);
@@ -61,7 +59,6 @@ export class StripeService {
       throw new Error(`Erro ao deletar cliente do Stripe: ${error.message}`);
     }
   }
-
   async deleteConnectAccount(accountId: string): Promise<void> {
     try {
       await this.stripe.accounts.del(accountId);
@@ -85,7 +82,6 @@ export class StripeService {
     return { sessionId: session.id, sessionURL: session.url, plan }
 
   }
-
   async createAccountOnboardingLink(stripeAccountId: string): Promise<string> {
     try {
       const link = await this.stripe.accountLinks.create({
@@ -102,7 +98,6 @@ export class StripeService {
       throw new InternalServerErrorException('Erro ao gerar link Stripe.');
     }
   }
-
   async createAccountStripe(name: string, email: string, company?: string) {
     const customer = await this.stripe.customers.create({
       name: name as string,
@@ -113,7 +108,6 @@ export class StripeService {
     })
     return customer.id
   }
-
   async createAccountConnect(data: Prisma.UserCreateInput) {
 
     const customerID = await this.createAccountStripe(data.name as string, data.email)
@@ -127,12 +121,10 @@ export class StripeService {
     })
     return { stripe_id: customerID, stripe_connect_id: accountConnect.id };
   }
-
   async listAccountsConnect() {
     const list = await this.stripe.accounts.list({ limit: 10 })
     return list;
   }
-
   async handleWebhookEvent(payload: Buffer, signature: string): Promise<void> {
     let event: Stripe.Event;
 
@@ -231,5 +223,4 @@ export class StripeService {
       }
     }
   }
-
 }
