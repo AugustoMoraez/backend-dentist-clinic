@@ -8,7 +8,8 @@ import { createSignatureType } from './schemas/create-signature.schema';
 export class SignatureService {
   constructor(
     private stripe: StripeService,
-    private prisma: DatabaseService
+    private prisma: DatabaseService,
+
   ) { }
   async create({ description, name, stripeAccount, unit_amount }: createSignatureType) {
     const user = await this.prisma.user.findMany({
@@ -18,32 +19,62 @@ export class SignatureService {
     if (!user[0] || !user[0].stripe_connect_id) {
       throw new Error("Usuário não encontrado ou sem conta Stripe Connect");
     }
+    const canCreate = await this.canUserCreatePlan(user[0].stripe_connect_id)
+    if(canCreate){
 
-    const stripeAccountID = user[0].stripe_connect_id;
 
-    const product = await this.stripe.createCustomerProduct({
-      name,
-      description,
-      stripeAccount,
+      const stripeAccountID = user[0].stripe_connect_id;
+  
+      const product = await this.stripe.createCustomerProduct({
+        name,
+        description,
+        stripeAccount,
+      });
+  
+      const price = await this.stripe.createCustomerPrice({
+        unit_amount,
+        product: product.id,
+        stripeAccount: stripeAccountID,
+      });
+  
+      const signature = await this.prisma.signature.create({
+        data: {
+          name,
+          unit_amount,
+          stripeProductId: product.id,
+          stripePriceId: price.id,
+          userID: user[0].id,
+        },
+      });
+  
+      return signature;
+    }else{
+      throw new Error("Limite de assinaturas atingido para seu plano.");
+    }
+  }
+  async canUserCreatePlan(stripe_connect_id:string) {
+    const user = await this.prisma.user.findUnique({
+      where: { stripe_connect_id },
+      include: { Signature: true },
     });
 
-    const price = await this.stripe.createCustomerPrice({
-      unit_amount,
-      product: product.id,
-      stripeAccount:stripeAccountID,
-    });
+    if (!user) {
+      throw new Error("Usuário não encontrado.");
+    }
 
-    const signature = await this.prisma.signature.create({
-    data: {
-      name,
-      unit_amount,  
-      stripeProductId: product.id,
-      stripePriceId: price.id,
-      userID: user[0].id,
-    },
-  });
+    const currentSignatureCount = user.Signature.length;
 
-  return signature;
+    switch (user.plan) {
+      case "BASIC":
+        return currentSignatureCount < 1;
+      case "PRO":
+        return currentSignatureCount < 3;
+      case 'PREMIUM':
+        return true;
+      default:
+        return false;
+    }
+
   }
 
 }

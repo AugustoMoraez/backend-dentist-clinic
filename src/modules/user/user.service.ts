@@ -10,13 +10,13 @@ import { StripeService } from '../stripe/stripe.service';
 
 @Injectable()
 export class UserService {
-   
+
   constructor
     (@Inject() private prisma: DatabaseService,
       private jwtService: JwtService,
       private config: ConfigService,
       private stripe: StripeService
-    ) {}
+    ) { }
 
   async create(data: Prisma.UserCreateInput) {
     await this.validateUniqueFields(data);
@@ -51,7 +51,32 @@ export class UserService {
       refreshToken,
     };
   }
+  async userExists({id,email,stripe_connect_id,stripe_id}:{id?: string, email?: string, stripe_id?: string, stripe_connect_id?: string}) {
+    if (!id && !email && !stripe_id && !stripe_connect_id) {
+      throw new Error("Pelo menos um identificador deve ser fornecido.");
+    }
 
+    try {
+      const user = await this.prisma.user.findFirst({
+        where: {
+          OR: [
+            id ? { id } : undefined,
+            email ? { email } : undefined,
+            stripe_id ? { stripe_id } : undefined,
+            stripe_connect_id ? { stripe_connect_id } : undefined,
+          ].filter(Boolean) as any, 
+        },
+      });
+
+      if (!user) {
+        throw new Error("Usuário não encontrado.");
+      }
+
+      return user;
+    } catch (error) {
+      throw new Error("Erro ao buscar usuário: " + (error as Error).message);
+    }
+  }
 
   async update(id: string, data: Partial<Prisma.UserUpdateInput>) {
     if (data.password) {
@@ -86,7 +111,7 @@ export class UserService {
     }
   }
   async deleteAllUsers() {
-     
+
     const users = await this.prisma.user.findMany({
       select: {
         stripe_id: true,
@@ -94,7 +119,7 @@ export class UserService {
       },
     });
 
-     
+
     for (const user of users) {
       try {
         if (user.stripe_id) {
