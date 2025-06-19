@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { StripeService } from '../stripe/stripe.service';
 import { DatabaseService } from '../database/database.service';
 import { createSignatureType } from './schemas/create-signature.schema';
+import { UserService } from '../user/user.service';
 
 
 @Injectable()
@@ -9,21 +10,15 @@ export class SignatureService {
   constructor(
     private stripe: StripeService,
     private prisma: DatabaseService,
+    private user: UserService
 
   ) { }
   async create({ description, name, stripeAccount, unit_amount }: createSignatureType) {
-    const user = await this.prisma.user.findMany({
-      where: { stripe_connect_id: stripeAccount },
-    });
-
-    if (!user[0] || !user[0].stripe_connect_id) {
-      throw new Error("Usuário não encontrado ou sem conta Stripe Connect");
-    }
-    const canCreate = await this.canUserCreatePlan(user[0].stripe_connect_id)
+    const user = await this.user.userExists({stripe_connect_id:stripeAccount})
+    
+    const canCreate = await this.canUserCreatePlan(user.stripe_connect_id as string)
     if(canCreate){
-
-
-      const stripeAccountID = user[0].stripe_connect_id;
+      const stripeAccountID = user.stripe_connect_id;
   
       const product = await this.stripe.createCustomerProduct({
         name,
@@ -34,7 +29,7 @@ export class SignatureService {
       const price = await this.stripe.createCustomerPrice({
         unit_amount,
         product: product.id,
-        stripeAccount: stripeAccountID,
+        stripeAccount: stripeAccountID as string,
       });
   
       const signature = await this.prisma.signature.create({
@@ -43,13 +38,13 @@ export class SignatureService {
           unit_amount,
           stripeProductId: product.id,
           stripePriceId: price.id,
-          userID: user[0].id,
+          userID: user.id,
         },
       });
   
       return signature;
     }else{
-      throw new Error("Limite de assinaturas atingido para seu plano.");
+      throw new UnauthorizedException("Limite de assinaturas atingido para seu plano.");
     }
   }
   async canUserCreatePlan(stripe_connect_id:string) {
@@ -59,7 +54,7 @@ export class SignatureService {
     });
 
     if (!user) {
-      throw new Error("Usuário não encontrado.");
+      throw new UnauthorizedException("Usuário não encontrado.");
     }
 
     const currentSignatureCount = user.Signature.length;
@@ -76,5 +71,14 @@ export class SignatureService {
     }
 
   }
+  async getAllSignatures(id:string){
+    const user = this.prisma.signature.findMany({
+      where:{
+        userID:id
+      }
+    })
+    return user;
+  }
+
 
 }

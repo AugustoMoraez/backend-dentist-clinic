@@ -3,6 +3,7 @@ import { createCustomerType } from './schemas/create-customer.schema';
 import { DatabaseService } from '../database/database.service';
 import { Prisma } from '@prisma/client';
 import { StripeService } from '../stripe/stripe.service';
+import { PaginationQueryDto } from './schemas/pagination.schema';
 
 
 @Injectable()
@@ -29,11 +30,16 @@ export class CustomerService {
     return {count:list.length,data:list}
   }
 
-  findOne(name: string) {
-    
-    
-    
-    return null;
+  async findAllByUser(userId: string, pagination: PaginationQueryDto) {
+    const { limit, offset } = pagination;
+
+    const clientes = await this.prisma.customer.findMany({
+      where: { id:userId },
+      skip: offset,
+      take: limit,
+    });
+
+    return clientes;
   }
 
   update(id: number, updateCustomerDto) {

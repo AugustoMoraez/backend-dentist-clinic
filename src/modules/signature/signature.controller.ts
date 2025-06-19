@@ -16,8 +16,7 @@ export class SignatureController {
 
   @Post()
   async create(@Body(new ZodValidationPipe(createSignatureSchema)) {name,description,stripeAccount,unit_amount}: createSignatureType){
-    this.user.userExists({stripe_connect_id:stripeAccount})
-    this.signatureService.create({
+    return this.signatureService.create({
       name,
       description,
       stripeAccount,
