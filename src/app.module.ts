@@ -9,6 +9,7 @@ import { StripeModule } from './modules/stripe/stripe.module';
 import { MailerCustomModule } from './modules/mailer/mailer.module';
 import { CustomerModule } from './modules/customer/customer.module';
 import { SignatureModule } from './modules/signature/signature.module';
+import { TestModule } from './modules/test/test.module';
  
  
  
@@ -24,6 +25,7 @@ import { SignatureModule } from './modules/signature/signature.module';
     MailerCustomModule,
     CustomerModule,
     SignatureModule,
+    TestModule,
      
   ],
   controllers: [AppController],

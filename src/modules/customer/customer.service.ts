@@ -13,33 +13,37 @@ export class CustomerService {
     private readonly stripe: StripeService
   ) { }
 
-  async create({name,cpf,email,phone}: createCustomerType,userID:string) {
-    const stripeCustomerId= await this.stripe.createAccountStripe(name,email,userID )
-    return await this.prisma.customer.create({ data:{
-      name,
-      cpf,
-      email,
-      phone,
-      stripeCustomerId,
-      userID
-    } })
+  async create({ name, cpf, email, phone }: createCustomerType, userID: string) {
+    const stripeCustomerId = await this.stripe.createAccountStripe(name, email, userID)
+    
+    return await this.prisma.customer.create({
+      data: {
+        name,
+        cpf,
+        email,
+        phone,
+        stripeCustomerId,
+        userID
+      }
+    })
   }
 
-  async findAll(userID:string) {
-    const list =  await this.prisma.customer.findMany({where:{userID}})
-    return {count:list.length,data:list}
+  async findAll(userID: string) {
+    const list = await this.prisma.customer.findMany({ where: { userID } })
+    return { count: list.length, data: list }
   }
 
   async findAllByUser(userId: string, pagination: PaginationQueryDto) {
     const { limit, offset } = pagination;
 
-    const clientes = await this.prisma.customer.findMany({
-      where: { id:userId },
+    const customer = await this.prisma.customer.findMany({
+      where: { id: userId },
       skip: offset,
       take: limit,
+
     });
 
-    return clientes;
+    return customer;
   }
 
   update(id: number, updateCustomerDto) {

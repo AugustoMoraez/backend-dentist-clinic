@@ -31,14 +31,17 @@ export class CustomerController {
 
   @Get()
   async findAllByUser(
-    @Param('userId', ParseIntPipe) userId: string,
+    @Request() req: any,
     @Query() query: any,
   ) {
+
+    const userId = req.user.userId;
+
     const result = PaginationQuerySchema.safeParse(query);
     if (!result.success) {
       throw new BadRequestException(result.error.format());
     }
-
+    
     return this.customerService.findAllByUser(userId, result.data);
   }
 
