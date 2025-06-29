@@ -20,8 +20,10 @@ model Address {
   state        String?
   complement   String?
 
-  user_id String     @unique
-  user    User @relation(fields: [user_id], references: [id])
+  user_id     String?  @unique
+  user        User?    @relation( fields: [user_id], references: [id])
+ 
+
 }
 
 enum Subs_Status {
@@ -58,7 +60,7 @@ model User {
   cpf          String? @unique
   contact_1    String
   contact_2    String?
-  address      Address?
+  address      Address?  
   AccountVerification Boolean @default(false)
   
   //stripe
@@ -74,7 +76,7 @@ model User {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   
-
+   
   Customer Customer[]
   Signature Signature[]
 }
@@ -90,7 +92,7 @@ model Customer {
   userID            String
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
-
+  address          String?
   @@unique([cpf, userID])
   @@unique([email, userID])  
   @@index([userID])

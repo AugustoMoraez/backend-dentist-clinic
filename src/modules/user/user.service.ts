@@ -27,7 +27,7 @@ export class UserService {
       data: {
         ...data,
         password: hashPassword,
-        address: data.address ? { create: data.address } : undefined,
+        address: data.address ? { create:data.address} : undefined,
       },
     });
 

@@ -2,7 +2,7 @@ stripe listen --forward-to localhost:3000/stripe/webhook
 
 lista de coisas para fazer:
 
-criar rota falsa para testar paginação no frontend
+criar rota falsa para testar paginação no frontend[feito]
 
 -downgrade de assinaturas:se o usuario estiver no plano pro e baixa para o basico as assinaturas excedentes do plano devem fica inativas.
 

@@ -9,6 +9,10 @@ export const PaginationQuerySchema = z.object({
     .string()
     .optional()
     .transform((val) => (val ? parseInt(val) : 0)),
+     search: z
+    .string()
+    .optional()
+    .transform((val) => val?.trim() || "")
 });
 
 export type PaginationQueryDto = z.infer<typeof PaginationQuerySchema>;

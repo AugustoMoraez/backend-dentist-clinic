@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PaginationQueryDto } from '../customer/schemas/pagination.schema';
-import { customers } from 'src/temp/data';
+import { customers } from 'src/modules/test/database/customers';
+
 @Injectable()
 export class TestService {
     async findAllByUser(userId: string, pagination: PaginationQueryDto) {

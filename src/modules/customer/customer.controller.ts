@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, ParseIntPipe, Query, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, ParseIntPipe, Query, BadRequestException, Put } from '@nestjs/common';
 import { CustomerService } from './customer.service';
 import { ZodValidationPipe } from 'src/pipes/zod/zod.validatePipe';
 import { createCustomerSchema, createCustomerType } from './schemas/create-customer.schema';
 import { JwtAuthGuard } from 'src/modules/auth/JWT/jwt.guard';
 import { PaginationQuerySchema } from './schemas/pagination.schema';
+import { updateCustomerSchema, UpdateCustomerType } from './schemas/update-customer.schema';
 
 
 @Controller('customer')
@@ -21,39 +22,37 @@ export class CustomerController {
     return this.customerService.create(data, userID);
   }
 
-
   @Get("/all")
   findAll(@Request() req: any) {
     const userID = req.user.userId;
     return this.customerService.findAll(userID);
   }
 
-
   @Get()
   async findAllByUser(
     @Request() req: any,
-    @Query() query: any,
+    @Query() query: any
   ) {
-
     const userId = req.user.userId;
 
     const result = PaginationQuerySchema.safeParse(query);
     if (!result.success) {
       throw new BadRequestException(result.error.format());
     }
-    
+
     return this.customerService.findAllByUser(userId, result.data);
   }
 
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCustomerDto) {
-    return this.customerService.update(+id, updateCustomerDto);
+  @Put(':id')
+  async update(
+    @Param('id') id: string,
+    @Request() req: any,
+    @Body(new ZodValidationPipe(updateCustomerSchema)) data: UpdateCustomerType
+  ) {
+    const userID = req.user.userId;
+    return this.customerService.update(id, userID, data);
   }
 
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.customerService.remove(+id);
-  }
+
 }

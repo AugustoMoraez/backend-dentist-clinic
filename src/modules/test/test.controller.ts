@@ -6,7 +6,10 @@ import { PaginationQuerySchema } from '../customer/schemas/pagination.schema';
 @Controller('test')
 @UseGuards(JwtAuthGuard)
 export class TestController {
+
   constructor(private readonly testService: TestService) {}
+ 
+  
   @Get("customer/all")
     async findAllByUser(
       @Request() req: any,
