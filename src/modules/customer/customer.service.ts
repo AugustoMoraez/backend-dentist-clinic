@@ -75,4 +75,21 @@ export class CustomerService {
     });
   }
 
+
+  async delete(customerId: string, userID: string) {
+    const customer = await this.prisma.customer.findUnique({
+      where: { id: customerId },
+    });
+
+    if (!customer || customer.userID !== userID) {
+      throw new NotFoundException('Cliente não encontrado ou acesso negado');
+    }
+
+    await this.prisma.customer.delete({
+      where: { id: customerId },
+    });
+
+    return { message: 'Cliente deletado com sucesso' };
+  }
+
 }

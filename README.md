@@ -10,16 +10,18 @@ criar rota falsa para testar paginação no frontend[feito]
 
 criar paginacao em chamadas de busca da api[feito]
 
-listar assinaturas
 
 listar clientes[feito]
 
+editar cliente[feito]
+
 excluir cliente
+
+listar assinaturas
 
 excluir assinatura
 
 editar assinatura
 
-editar cliente
 
 -adicionar cliente a assinatura

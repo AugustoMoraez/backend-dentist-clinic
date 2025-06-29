@@ -53,6 +53,15 @@ export class CustomerController {
     return this.customerService.update(id, userID, data);
   }
 
+  @Delete(':id')
+  async deleteCustomer(
+    @Param('id') id: string,
+    @Request() req: any
+  ) {
+    const userID = req.user.userId;
+    return this.customerService.delete(id, userID);
+  }
+
 
 
 }
