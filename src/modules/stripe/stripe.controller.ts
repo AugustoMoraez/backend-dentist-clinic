@@ -10,29 +10,39 @@ import {
   HttpStatus,
   BadRequestException,
   UseGuards,
+  Request,
 } from '@nestjs/common';
-import { Response, Request } from 'express';
+import { Response as ResponseExpress,Request as requestExpress } from 'express';
 import { StripeService } from './stripe.service';
 import { JwtAuthGuard } from '../auth/JWT/jwt.guard';
+import { UserService } from '../user/user.service';
 
 @Controller('stripe')
-
 export class StripeController {
-  constructor(private readonly stripeService: StripeService) { }
+  constructor(
+    private readonly user:UserService,
+    private readonly stripeService: StripeService
+  ) {}
+
   @Get("users")
   getUsers() {
     return this.stripeService.listAccountsConnect()
   }
-  @UseGuards(JwtAuthGuard)
-  @Get('account-link-generate/:stripeAccountId')
-  async generateLink(@Param('stripeAccountId') stripeAccountId: string) {
-    if (!stripeAccountId) {
-      return { error: 'stripeAccountId é obrigatório.' };
-    }
 
-    const url = await this.stripeService.createAccountOnboardingLink(stripeAccountId);
-    return { url };
+  @UseGuards(JwtAuthGuard)
+  @Get('account-link-generate')
+  async generateLink(@Request() req:any)  {
+    const userID = req.user.userId;
+    
+    const user = await this.user.userExists({id:userID});
+    
+    if(user){
+      const url = await this.stripeService.createAccountOnboardingLink(user.stripe_connect_id as string);
+      return { url };
+    } 
+     
   }
+
   @UseGuards(JwtAuthGuard)
   @Post("checkout/:id/:plan")
   getCheckoutUrl(
@@ -48,11 +58,10 @@ export class StripeController {
     return this.stripeService.createCheckoutSession(id, plan.toLocaleUpperCase());
   }
 
-
   @Post('webhook')
   async handleWebhook(
-    @Req() req: Request,
-    @Res() res: Response,
+    @Req() req: requestExpress,
+    @Res() res: ResponseExpress,
     @Headers('stripe-signature') signature: string,
   ) {
     const rawBody = req.body;

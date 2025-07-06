@@ -1,10 +1,12 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import Stripe from 'stripe';
+import { BadRequestException, forwardRef, Inject, Injectable, InternalServerErrorException, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Prisma } from '@prisma/client';
-import Stripe from 'stripe';
 import { DatabaseService } from '../database/database.service';
 import { createProductType } from './schemas/createCustomerProduct.schema';
 import { createPriceType } from './schemas/createCustomerPrice.schem';
+import { UserService } from '../user/user.service';
+import { randomBytes } from 'crypto';
 
 
 @Injectable()
@@ -14,7 +16,9 @@ export class StripeService {
 
   constructor(
     private config: ConfigService,
-    private prisma: DatabaseService) {
+    private prisma: DatabaseService,
+    @Inject(forwardRef(() => UserService)) private user: UserService,
+  ) {
     this.stripe = new Stripe(this.config.get("STRIPE_SECRET_KEY") as string, { apiVersion: "2025-03-31.basil" })
   }
 
@@ -34,7 +38,7 @@ export class StripeService {
     }
   }
   async createCustomerPrice({ unit_amount, stripeAccount, product }: createPriceType) {
-    
+
     try {
       const price = await this.stripe.prices.create({
         unit_amount,
@@ -82,12 +86,38 @@ export class StripeService {
     return { sessionId: session.id, sessionURL: session.url, plan }
 
   }
-  async createAccountOnboardingLink(stripeAccountId: string): Promise<string> {
+  async handleStripeVerifyTokenCreate(stripeConnectId: string) {
+    const token = randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 1000 * 60 * 30);
+
+    try {
+      const dataToken = await this.prisma.stripeVerifyToken.upsert({
+        where: { stripeConnectId },
+        update: {
+          token,
+          expiresAt,
+        },
+        create: {
+          stripeConnectId,
+          token,
+          expiresAt,
+        },
+      });
+      return dataToken;
+    } catch (error) {
+      throw new ServiceUnavailableException({
+        error: error.message ?? error,
+        message: 'Erro ao salvar token. Tente novamente mais tarde.',
+      });
+    }
+  }
+  async createAccountOnboardingLink(stripeConnectId: string): Promise<string> {
+    const dataToken = await this.handleStripeVerifyTokenCreate(stripeConnectId);
     try {
       const link = await this.stripe.accountLinks.create({
-        account: stripeAccountId,
-        refresh_url: 'http://localhost:5173/stripe-verification/erro',
-        return_url: 'http://localhost:5173/stripe-verification/sucesso',
+        account: stripeConnectId,
+        refresh_url: `http://localhost:5173/stripe-verification/erro/${dataToken.token}`,
+        return_url: `http://localhost:5173/stripe-verification/sucesso/${dataToken.token}`,
         type: 'account_onboarding',
       });
       return link.url;
@@ -95,7 +125,7 @@ export class StripeService {
       if (error instanceof Stripe.errors.StripeInvalidRequestError) {
         throw new BadRequestException('ID da conta Stripe inválido.');
       }
-      throw new InternalServerErrorException('Erro ao gerar link Stripe.');
+      throw new InternalServerErrorException({msg:'Erro ao gerar link Stripe.',error});
     }
   }
   async createAccountStripe(name: string, email: string, company?: string) {

@@ -22,8 +22,6 @@ model Address {
 
   user_id     String?  @unique
   user        User?    @relation( fields: [user_id], references: [id])
- 
-
 }
 
 enum Subs_Status {
@@ -80,6 +78,7 @@ model User {
   Customer Customer[]
   Signature Signature[]
 }
+
 model Customer {
   id                String   @id @default(cuid())
   name              String
@@ -112,6 +111,14 @@ model AccountVerifyToken {
   email     String   @unique 
   expiresAt DateTime
   createdAt DateTime @default(now())
+}
+
+model StripeVerifyToken {
+  id                 String   @id @default(uuid())
+  token              String   @unique
+  stripeConnectId    String   @unique 
+  expiresAt          DateTime
+  createdAt          DateTime @default(now())
 }
 
 

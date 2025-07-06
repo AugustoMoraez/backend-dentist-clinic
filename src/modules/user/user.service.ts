@@ -51,6 +51,7 @@ export class UserService {
       refreshToken,
     };
   }
+
   async userExists({id,email,stripe_connect_id,stripe_id}:{id?: string, email?: string, stripe_id?: string, stripe_connect_id?: string}) {
     if (!id && !email && !stripe_id && !stripe_connect_id) {
       throw new Error("Pelo menos um identificador deve ser fornecido.");
@@ -110,6 +111,7 @@ export class UserService {
       throw new ConflictException('Já existe um usuário com esse CNPJ');
     }
   }
+  
   async deleteAllUsers() {
 
     const users = await this.prisma.user.findMany({
