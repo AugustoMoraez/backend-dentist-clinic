@@ -37,7 +37,7 @@ export class StripeController {
     const user = await this.user.userExists({id:userID});
     
     if(user){
-      const url = await this.stripeService.createAccountOnboardingLink(user.stripe_connect_id as string);
+      const url = await this.stripeService.createAccountOnboardingLink(user.stripe_connect_id as string,user.email);
       return { url };
     } 
      
@@ -56,6 +56,20 @@ export class StripeController {
       throw new BadRequestException(`Plano inválido: ${plan.toUpperCase()}`);
     }
     return this.stripeService.createCheckoutSession(id, plan.toLocaleUpperCase());
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post("/verifyStripeToken/:token")
+  async handleVerifyStripeToken( 
+    @Param("token") token: string,
+    @Request() req:any
+  ){
+    const userID = req.user.userId;
+    const user = await this.user.userExists({id:userID});
+
+    if(user){
+      await this.stripeService.handleStripeVerification(token)
+    }
   }
 
   @Post('webhook')
