@@ -116,6 +116,7 @@ model AccountVerifyToken {
 model StripeVerifyToken {
   id                 String   @id @default(uuid())
   token              String   @unique
+  email              String   @unique 
   stripeConnectId    String   @unique 
   expiresAt          DateTime
   createdAt          DateTime @default(now())

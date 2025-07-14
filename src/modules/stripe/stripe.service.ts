@@ -86,7 +86,7 @@ export class StripeService {
     return { sessionId: session.id, sessionURL: session.url, plan }
 
   }
-  async handleStripeVerifyTokenCreate(stripeConnectId: string) {
+  async handleStripeVerifyTokenCreate(stripeConnectId: string,email:string) {
     const token = randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + 1000 * 60 * 30);
 
@@ -99,6 +99,7 @@ export class StripeService {
         },
         create: {
           stripeConnectId,
+          email,
           token,
           expiresAt,
         },
@@ -111,12 +112,12 @@ export class StripeService {
       });
     }
   }
-  async createAccountOnboardingLink(stripeConnectId: string): Promise<string> {
-    const dataToken = await this.handleStripeVerifyTokenCreate(stripeConnectId);
+  async createAccountOnboardingLink(stripeConnectId: string,email:string): Promise<string> {
+    const dataToken = await this.handleStripeVerifyTokenCreate(stripeConnectId,email);
     try {
       const link = await this.stripe.accountLinks.create({
         account: stripeConnectId,
-        refresh_url: `http://localhost:5173/stripe-verification/erro/${dataToken.token}`,
+        refresh_url: `http://localhost:5173/stripe-verification/erro`,
         return_url: `http://localhost:5173/stripe-verification/sucesso/${dataToken.token}`,
         type: 'account_onboarding',
       });
@@ -125,52 +126,78 @@ export class StripeService {
       if (error instanceof Stripe.errors.StripeInvalidRequestError) {
         throw new BadRequestException('ID da conta Stripe inválido.');
       }
-      throw new InternalServerErrorException({msg:'Erro ao gerar link Stripe.',error});
+      throw new InternalServerErrorException({ msg: 'Erro ao gerar link Stripe.', error });
     }
   }
-  async createAccountStripe(name: string, email: string, company?: string) {
-    const customer = await this.stripe.customers.create({
-      name: name as string,
-      email: email,
-      metadata: {
-        CompanyClient: company ? company : "Mira Assinatura"
-      }
-    })
-    return customer.id
-  }
-  async createAccountConnect(data: Prisma.UserCreateInput) {
+  async handleStripeVerification(token: string) {
 
-    const customerID = await this.createAccountStripe(data.name as string, data.email)
-    const accountConnect = await this.stripe.accounts.create({
-      type: 'express',
-      email: data.email,
+    const record = await this.prisma.stripeVerifyToken.findUnique({ where: { token } });
 
-      metadata: {
-        customerID: customerID
-      }
-    })
-    return { stripe_id: customerID, stripe_connect_id: accountConnect.id };
-  }
-  async listAccountsConnect() {
-    const list = await this.stripe.accounts.list({ limit: 10 })
-    return list;
-  }
-  async handleWebhookEvent(payload: Buffer, signature: string): Promise<void> {
-    let event: Stripe.Event;
+    if (!record || record.expiresAt < new Date()) {
+      throw new BadRequestException('Token inválido ou expirado');
+    }
 
     try {
-      event = this.stripe.webhooks.constructEvent(
-        payload,
-        signature,
-        this.config.get("WEB_HOOK") as string
-      );
-      console.log(`✅ Evento recebido: ${event.type}`);
-    } catch (err) {
-      console.error('❌ Erro na verificação da assinatura do webhook:', err.message);
-      throw new Error(`Webhook signature verification failed: ${err.message}`);
-    }
+      await this.prisma.user.update({
+        where: { email: record.email },
+        data: { stripe_verification: true },
+      });
 
-    switch (event.type) {
+      await this.prisma.stripeVerifyToken.delete({ where: { token } });
+
+    } catch (error) {
+      throw new ServiceUnavailableException({
+        erro: error,
+        msg: "Erro, tente novamente mais tarde"
+      })
+    }
+  
+
+    return { message: 'Conta ativa com sucesso' };
+  }
+  async createAccountStripe(name: string, email: string, company ?: string) {
+      const customer = await this.stripe.customers.create({
+        name: name as string,
+        email: email,
+        metadata: {
+          CompanyClient: company ? company : "Mira Assinatura"
+        }
+      })
+      return customer.id
+    }
+  async createAccountConnect(data: Prisma.UserCreateInput) {
+
+      const customerID = await this.createAccountStripe(data.name as string, data.email)
+      const accountConnect = await this.stripe.accounts.create({
+        type: 'express',
+        email: data.email,
+
+        metadata: {
+          customerID: customerID
+        }
+      })
+      return { stripe_id: customerID, stripe_connect_id: accountConnect.id };
+    }
+  async listAccountsConnect() {
+      const list = await this.stripe.accounts.list({ limit: 10 })
+      return list;
+    }
+  async handleWebhookEvent(payload: Buffer, signature: string): Promise < void> {
+      let event: Stripe.Event;
+
+      try {
+        event = this.stripe.webhooks.constructEvent(
+          payload,
+          signature,
+          this.config.get("WEB_HOOK") as string
+        );
+        console.log(`✅ Evento recebido: ${event.type}`);
+      } catch(err) {
+        console.error('❌ Erro na verificação da assinatura do webhook:', err.message);
+        throw new Error(`Webhook signature verification failed: ${err.message}`);
+      }
+
+    switch(event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
 
@@ -248,9 +275,9 @@ export class StripeService {
       }
 
       default: {
-        console.log(`ℹ️ Evento não tratado: ${event.type}`);
-        break;
-      }
-    }
+    console.log(`ℹ️ Evento não tratado: ${event.type} `);
+    break;
+  }
+}
   }
 }
